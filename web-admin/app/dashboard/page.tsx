@@ -82,6 +82,26 @@ export default function DashboardPage() {
     );
   });
 
+  // Calculate services by depot/location
+  const servicesByDepot = tickets.reduce((acc, ticket) => {
+    // Find the technician's depot
+    const technician = users.find(u => u.id === ticket.technicianId);
+    const depot = technician?.depot || "Nepoznato";
+
+    if (!acc[depot]) {
+      acc[depot] = { total: 0, completed: 0, inProgress: 0 };
+    }
+
+    acc[depot].total++;
+    if (ticket.status === "completed") {
+      acc[depot].completed++;
+    } else {
+      acc[depot].inProgress++;
+    }
+
+    return acc;
+  }, {} as Record<string, { total: number; completed: number; inProgress: number }>);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -262,6 +282,98 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
+
+        {/* Services by Depot/Location */}
+        {Object.keys(servicesByDepot).length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Servisi po lokaciji
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(servicesByDepot).map(([depot, stats]) => (
+                <div key={depot} className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <svg
+                          className="w-5 h-5 text-purple-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">{depot}</h3>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-yellow-50 rounded-xl p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <svg
+                          className="w-4 h-4 text-yellow-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span className="text-yellow-700 text-xs font-semibold">
+                          U TOKU
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold text-yellow-900">
+                        {stats.inProgress}
+                      </p>
+                    </div>
+
+                    <div className="bg-green-50 rounded-xl p-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <svg
+                          className="w-4 h-4 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span className="text-green-700 text-xs font-semibold">
+                          ZAVRŠENO
+                        </span>
+                      </div>
+                      <p className="text-2xl font-bold text-green-900">
+                        {stats.completed}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Services */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

@@ -17,6 +17,7 @@ type DashboardNavigationProp = BottomTabNavigationProp<MainTabParamList, "Dashbo
 export default function DashboardScreen() {
   const navigation = useNavigation<DashboardNavigationProp>();
   const user = useAuthStore((s) => s.user);
+  const allUsers = useAuthStore((s) => s.allUsers);
   const tickets = useServiceStore((s) => s.tickets);
 
   const activeTickets = tickets.filter((t) => t.status === "in_progress");
@@ -26,6 +27,26 @@ export default function DashboardScreen() {
     const today = new Date();
     return ticketDate.toDateString() === today.toDateString();
   });
+
+  // Calculate services by depot/location
+  const servicesByDepot = tickets.reduce((acc, ticket) => {
+    // Find the technician's depot
+    const technician = allUsers.find(u => u.id === ticket.technicianId);
+    const depot = technician?.depot || "Nepoznato";
+
+    if (!acc[depot]) {
+      acc[depot] = { total: 0, completed: 0, inProgress: 0 };
+    }
+
+    acc[depot].total++;
+    if (ticket.status === "completed") {
+      acc[depot].completed++;
+    } else {
+      acc[depot].inProgress++;
+    }
+
+    return acc;
+  }, {} as Record<string, { total: number; completed: number; inProgress: number }>);
 
   const isSuperUser = user?.role === "super_user";
 
@@ -129,6 +150,60 @@ export default function DashboardScreen() {
             </View>
           </View>
         </View>
+
+        {/* Services by Depot/Location - Only for Super Admin */}
+        {isSuperUser && Object.keys(servicesByDepot).length > 0 && (
+          <View className="px-6 mb-6">
+            <Text className="text-gray-900 text-lg font-bold mb-4">
+              Servisi po lokaciji
+            </Text>
+            <View className="gap-3">
+              {Object.entries(servicesByDepot).map(([depot, stats]) => (
+                <View key={depot} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <View className="flex-row items-center justify-between mb-3">
+                    <View className="flex-row items-center gap-2">
+                      <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center">
+                        <Ionicons name="location" size={20} color="#9333EA" />
+                      </View>
+                      <Text className="text-gray-900 text-base font-bold">
+                        {depot}
+                      </Text>
+                    </View>
+                    <Text className="text-gray-900 text-xl font-bold">
+                      {stats.total}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row gap-2">
+                    <View className="flex-1 bg-amber-50 rounded-xl p-3">
+                      <View className="flex-row items-center gap-1 mb-1">
+                        <Ionicons name="time-outline" size={14} color="#F59E0B" />
+                        <Text className="text-amber-700 text-xs font-semibold">
+                          U TOKU
+                        </Text>
+                      </View>
+                      <Text className="text-amber-900 text-lg font-bold">
+                        {stats.inProgress}
+                      </Text>
+                    </View>
+
+                    <View className="flex-1 bg-emerald-50 rounded-xl p-3">
+                      <View className="flex-row items-center gap-1 mb-1">
+                        <Ionicons name="checkmark-circle-outline" size={14} color="#10B981" />
+                        <Text className="text-emerald-700 text-xs font-semibold">
+                          ZAVRŠENO
+                        </Text>
+                      </View>
+                      <Text className="text-emerald-900 text-lg font-bold">
+                        {stats.completed}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Recent Activity */}
         <View className="px-6 mb-6">

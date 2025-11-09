@@ -32,6 +32,7 @@ export default function UserManagementScreen() {
   const [formCharismaId, setFormCharismaId] = useState("");
   const [formUsername, setFormUsername] = useState("");
   const [formPassword, setFormPassword] = useState("");
+  const [formConfirmPassword, setFormConfirmPassword] = useState("");
   const [formName, setFormName] = useState("");
   const [formRole, setFormRole] = useState<UserRole>("technician");
   const [formDepot, setFormDepot] = useState("");
@@ -40,14 +41,21 @@ export default function UserManagementScreen() {
     setFormCharismaId("");
     setFormUsername("");
     setFormPassword("");
+    setFormConfirmPassword("");
     setFormName("");
     setFormRole("technician");
     setFormDepot("");
   };
 
   const handleAddUser = () => {
-    if (!formCharismaId.trim() || !formUsername.trim() || !formPassword.trim() || !formName.trim() || !formDepot.trim()) {
+    if (!formCharismaId.trim() || !formUsername.trim() || !formPassword.trim() || !formConfirmPassword.trim() || !formName.trim() || !formDepot.trim()) {
       Alert.alert("Greška", "Molimo popunite sva polja");
+      return;
+    }
+
+    // Check if passwords match
+    if (formPassword !== formConfirmPassword) {
+      Alert.alert("Greška", "Lozinke se ne poklapaju");
       return;
     }
 
@@ -448,6 +456,20 @@ export default function UserManagementScreen() {
                     placeholderTextColor="#9CA3AF"
                     value={formPassword}
                     onChangeText={setFormPassword}
+                    secureTextEntry
+                  />
+                </View>
+
+                <View>
+                  <Text className="text-gray-700 text-sm font-semibold mb-2">
+                    Ponovi lozinku *
+                  </Text>
+                  <TextInput
+                    className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 text-base border-2 border-gray-200"
+                    placeholder="Ponovite lozinku"
+                    placeholderTextColor="#9CA3AF"
+                    value={formConfirmPassword}
+                    onChangeText={setFormConfirmPassword}
                     secureTextEntry
                   />
                 </View>
