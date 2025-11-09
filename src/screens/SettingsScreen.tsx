@@ -53,7 +53,7 @@ export default function SettingsScreen() {
     if (urlInput.includes("localhost") || urlInput.includes("127.0.0.1")) {
       Alert.alert(
         "Upozorenje",
-        "Koristite 'localhost' ali ste u mobilnoj aplikaciji.\n\nZa testiranje na pravom telefonu, koristite IP adresu računara (npr. http://192.168.1.100:3000).\n\nZa Expo Go ili iOS Simulator, možete nastaviti sa testiranjem."
+        "Koristite 'localhost' ali ste u mobilnoj aplikaciji.\n\nZa testiranje na pravom telefonu, koristite:\n• IP adresu računara (npr. http://192.168.1.100:3000) ako je na lokalnoj mreži\n• Javnu IP adresu ili domen ako je server dostupan javno\n\nZa Expo Go ili iOS Simulator, možete nastaviti sa testiranjem."
       );
     }
 
@@ -69,13 +69,14 @@ export default function SettingsScreen() {
         "Ne mogu da se povežem sa web panelom.\n\n" +
         "Mogući razlozi:\n" +
         "• Web panel nije pokrenut\n" +
-        "• Pogrešan URL\n" +
-        "• Koristite 'localhost' umesto IP adrese\n" +
-        "• Firewall blokira konekciju\n\n" +
+        "• Pogrešan URL ili adresa\n" +
+        "• Koristite 'localhost' umesto stvarne IP adrese ili domena\n" +
+        "• Firewall blokira konekciju\n" +
+        "• Server nije dostupan sa vaše mreže\n\n" +
         "Saveti:\n" +
         "• Pokrenite web panel: cd web-admin && bun dev\n" +
-        "• Koristite IP adresu računara, ne localhost\n" +
-        "• Proverite da su telefon i računar na istoj mreži"
+        "• Koristite IP adresu računara ili javni domen, ne localhost\n" +
+        "• Proverite da mobilni uređaj može da pristupi serveru"
       );
     }
   };
@@ -211,7 +212,7 @@ export default function SettingsScreen() {
               </Text>
               <TextInput
                 className="bg-gray-50 rounded-xl px-4 py-3 text-gray-900 text-base border-2 border-gray-200"
-                placeholder="http://192.168.1.100:3000"
+                placeholder="http://api.example.com:3000"
                 placeholderTextColor="#9CA3AF"
                 value={urlInput}
                 onChangeText={setUrlInput}
@@ -220,7 +221,7 @@ export default function SettingsScreen() {
                 keyboardType="url"
               />
               <Text className="text-gray-500 text-xs mt-2">
-                ⚠️ Ne koristite localhost! Unesite IP adresu računara (npr. http://192.168.1.100:3000)
+                Unesite IP adresu, javnu IP ili domen web panela
               </Text>
             </View>
 
@@ -260,19 +261,17 @@ export default function SettingsScreen() {
                   Kako koristiti Web Admin Panel:
                 </Text>
                 <Text className="text-blue-800 text-xs leading-5">
-                  1. Pokrenite web admin panel na računaru:{"\n"}
+                  1. Pokrenite web admin panel na serveru:{"\n"}
                   {"   "}cd web-admin && bun dev{"\n"}
                   {"\n"}
-                  2. Pronađite IP adresu računara:{"\n"}
-                  {"   "}• Windows: ipconfig{"\n"}
-                  {"   "}• Mac/Linux: ifconfig ili hostname -I{"\n"}
+                  2. Unesite URL web panela:{"\n"}
+                  {"   "}• Lokalna mreža: http://192.168.1.XXX:3000{"\n"}
+                  {"   "}• Javna adresa: http://vasdomen.com:3000{"\n"}
+                  {"   "}• Javna IP: http://XX.XX.XX.XX:3000{"\n"}
                   {"\n"}
-                  3. Unesite URL sa IP adresom:{"\n"}
-                  {"   "}http://192.168.1.XXX:3000{"\n"}
+                  3. Sačuvajte i testirajte konekciju{"\n"}
                   {"\n"}
-                  4. Sačuvajte i testirajte konekciju{"\n"}
-                  {"\n"}
-                  5. Sinhronizujte podatke{"\n"}
+                  4. Sinhronizujte podatke{"\n"}
                   {"\n"}
                   ⚠️ NE koristite localhost ili 127.0.0.1!
                 </Text>
@@ -289,9 +288,10 @@ export default function SettingsScreen() {
                   Važno:
                 </Text>
                 <Text className="text-amber-800 text-xs leading-5">
-                  • Telefon i računar moraju biti na istoj WiFi mreži{"\n"}
+                  • Mobilni uređaj mora imati mrežni pristup serveru{"\n"}
                   • Web panel mora biti pokrenut pre testiranja{"\n"}
-                  • Firewall može blokirati port 3000
+                  • Firewall ili router mogu blokirati pristup{"\n"}
+                  • Za javni pristup, server mora biti izložen internetu
                 </Text>
               </View>
             </View>

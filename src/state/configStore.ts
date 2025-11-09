@@ -34,7 +34,7 @@ export const useConfigStore = create<ConfigState>()(
           const apiUrl = useSyncStore.getState().apiUrl;
 
           // If no API URL is configured, not connected
-          if (!apiUrl || apiUrl === "http://192.168.1.100:3000") {
+          if (!apiUrl || apiUrl.trim() === "") {
             set({ isConnected: false });
             return false;
           }
@@ -65,8 +65,8 @@ export const useConfigStore = create<ConfigState>()(
           const apiUrl = useSyncStore.getState().apiUrl;
 
           // If no API URL is configured, use default mock data
-          if (!apiUrl || apiUrl === "http://192.168.1.100:3000") {
-            console.warn("No valid API URL configured. Using default data.");
+          if (!apiUrl || apiUrl.trim() === "") {
+            console.warn("No API URL configured. Using default mock data.");
             set({
               operations: [
                 { id: "1", code: "OP-001", name: "Čišćenje rezervoara", description: "Kompletno čišćenje rezervoara za vodu", isActive: true, createdAt: new Date("2024-01-01") },

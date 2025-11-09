@@ -18,7 +18,7 @@ interface SyncState {
 export const useSyncStore = create<SyncState>()(
   persist(
     (set, get) => ({
-      apiUrl: "http://192.168.1.100:3000",
+      apiUrl: "",
       autoSync: false,
       lastSyncTime: null,
       isSyncing: false,
