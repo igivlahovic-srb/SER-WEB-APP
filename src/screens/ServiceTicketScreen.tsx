@@ -44,9 +44,6 @@ export default function ServiceTicketScreen() {
   const [showSparePartsModal, setShowSparePartsModal] = useState(false);
   const [operationSearchQuery, setOperationSearchQuery] = useState("");
   const [sparePartSearchQuery, setSparePartSearchQuery] = useState("");
-  const [sparePartQuantity, setSparePartQuantity] = useState<{
-    [key: string]: number;
-  }>({});
 
   // Fetch config on mount if empty
   useEffect(() => {
@@ -112,28 +109,25 @@ export default function ServiceTicketScreen() {
     );
 
     if (existingPart) {
-      // Spare part already exists, just increase quantity
-      const quantity = sparePartQuantity[part.name] || 1;
+      // Spare part already exists, just increase quantity by 1
       const updatedPart: SparePart = {
         ...existingPart,
-        quantity: existingPart.quantity + quantity,
+        quantity: existingPart.quantity + 1,
       };
 
       // Update the existing part instead of adding new
       removeSparePartFromCurrentTicket(existingPart.id);
       addSparePartToCurrentTicket(updatedPart);
-      setSparePartQuantity({ ...sparePartQuantity, [part.name]: 1 });
       return;
     }
 
-    const quantity = sparePartQuantity[part.name] || 1;
+    // Add new spare part with quantity of 1
     const sparePart: SparePart = {
       id: Date.now().toString(),
       name: part.name,
-      quantity,
+      quantity: 1,
     };
     addSparePartToCurrentTicket(sparePart);
-    setSparePartQuantity({ ...sparePartQuantity, [part.name]: 1 });
   };
 
   const handleComplete = () => {
@@ -544,42 +538,18 @@ export default function ServiceTicketScreen() {
                           )}
                         </View>
                       </View>
-                      <View className="flex-row items-center gap-3">
-                        <View className="flex-1 flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
-                          <Text className="text-gray-500 text-sm mr-2">
-                            Količina:
-                          </Text>
-                          <TextInput
-                            className="flex-1 text-gray-900 text-base"
-                            keyboardType="number-pad"
-                            value={(
-                              sparePartQuantity[part.name] || 1
-                            ).toString()}
-                            onChangeText={(text) => {
-                              const qty = parseInt(text) || 1;
-                              setSparePartQuantity({
-                                ...sparePartQuantity,
-                                [part.name]: qty,
-                              });
-                            }}
-                          />
-                          <Text className="text-gray-500 text-sm ml-2">
-                            {part.unit}
-                          </Text>
-                        </View>
-                        <Pressable
-                          onPress={() => {
-                            handleAddSparePart(part);
-                            setShowSparePartsModal(false);
-                            setSparePartSearchQuery("");
-                          }}
-                          className="bg-emerald-600 px-6 py-3 rounded-lg active:opacity-80"
-                        >
-                          <Text className="text-white text-sm font-semibold">
-                            {existingPart ? "+" : "Dodaj"}
-                          </Text>
-                        </Pressable>
-                      </View>
+                      <Pressable
+                        onPress={() => {
+                          handleAddSparePart(part);
+                          setShowSparePartsModal(false);
+                          setSparePartSearchQuery("");
+                        }}
+                        className="bg-emerald-600 px-6 py-4 rounded-xl active:opacity-80 w-full"
+                      >
+                        <Text className="text-white text-base font-semibold text-center">
+                          {existingPart ? "Dodaj još" : "Dodaj"}
+                        </Text>
+                      </Pressable>
                     </View>
                   );
                 })
