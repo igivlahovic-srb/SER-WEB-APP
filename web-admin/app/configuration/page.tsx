@@ -9,7 +9,7 @@ export default function ConfigurationPage() {
   const router = useRouter();
   const [operations, setOperations] = useState<OperationTemplate[]>([]);
   const [spareParts, setSpareParts] = useState<SparePartTemplate[]>([]);
-  const [activeTab, setActiveTab] = useState<"operations" | "spareParts">("operations");
+  const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "database" | "deviceTypes">("operations");
   const [isLoading, setIsLoading] = useState(true);
 
   // Modals
@@ -417,36 +417,62 @@ export default function ConfigurationPage() {
             >
               Rezervni delovi ({spareParts.length})
             </button>
+            <button
+              onClick={() => setActiveTab("deviceTypes")}
+              className={`${
+                activeTab === "deviceTypes"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            >
+              Tipovi Uređaja
+            </button>
+            <button
+              onClick={() => setActiveTab("database")}
+              className={`${
+                activeTab === "database"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            >
+              Povezivanje sa Bazom
+            </button>
           </nav>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={openAddModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <span>+</span>
-            Dodaj novi
-          </button>
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <span>📊</span>
-            Import iz CSV/Excel
-          </button>
-          <button
-            onClick={fetchConfigData}
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-          >
-            Osveži
-          </button>
-        </div>
+        {/* Action Buttons - Only for operations and spareParts */}
+        {(activeTab === "operations" || activeTab === "spareParts") && (
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <span>+</span>
+              Dodaj novi
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <span>📊</span>
+              Import iz CSV/Excel
+            </button>
+            <button
+              onClick={fetchConfigData}
+              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+            >
+              Osveži
+            </button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="mt-6">
-          {isLoading ? (
+          {activeTab === "deviceTypes" ? (
+            <DeviceTypesTab />
+          ) : activeTab === "database" ? (
+            <DatabaseConnectionTab />
+          ) : isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
@@ -462,8 +488,8 @@ export default function ConfigurationPage() {
         </div>
       </div>
 
-      {/* Add Modal */}
-      {showAddModal && (
+      {/* Add Modal - Only for operations and spareParts */}
+      {showAddModal && (activeTab === "operations" || activeTab === "spareParts") && (
         <Modal
           title={`Dodaj ${activeTab === "operations" ? "operaciju" : "rezervni deo"}`}
           onClose={() => {
@@ -484,8 +510,8 @@ export default function ConfigurationPage() {
         </Modal>
       )}
 
-      {/* Edit Modal */}
-      {showEditModal && (
+      {/* Edit Modal - Only for operations and spareParts */}
+      {showEditModal && (activeTab === "operations" || activeTab === "spareParts") && (
         <Modal
           title={`Izmeni ${activeTab === "operations" ? "operaciju" : "rezervni deo"}`}
           onClose={() => {
@@ -787,6 +813,239 @@ function ItemForm({
         >
           Otkaži
         </button>
+      </div>
+    </div>
+  );
+}
+
+// Device Types Tab Component
+function DeviceTypesTab() {
+  const [deviceTypes] = useState([
+    { id: "1", name: "Aparati za vodu", isActive: true },
+    { id: "2", name: "Aparati za kafu", isActive: true },
+    { id: "3", name: "Aparati za prečišćavanje vazduha", isActive: true },
+    { id: "4", name: "Aparati za reverznu osmozu (G9)", isActive: true },
+  ]);
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h3 className="text-lg font-semibold text-gray-900">Tipovi Uređaja</h3>
+        <p className="text-sm text-gray-600 mt-1">
+          Predefinisani tipovi uređaja za servisersku aplikaciju
+        </p>
+      </div>
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {deviceTypes.map((type) => (
+            <div
+              key={type.id}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="text-xl">🔧</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">{type.name}</h4>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      type.isActive
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {type.isActive ? "Aktivan" : "Neaktivan"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Napomena:</strong> Tipovi uređaja su predefinisani i ne mogu
+            se menjati preko panela. Za izmene kontaktirajte administratora sistema.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Database Connection Tab Component
+function DatabaseConnectionTab() {
+  const [dbConfig, setDbConfig] = useState({
+    server: "",
+    database: "",
+    username: "",
+    password: "",
+    port: "1433",
+  });
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  const handleTestConnection = async () => {
+    setIsLoading(true);
+    setTestResult(null);
+    try {
+      const response = await fetch("/api/database/test");
+      const data = await response.json();
+
+      if (data.success) {
+        setIsConnected(true);
+        setTestResult("Konekcija uspešna! ✓");
+      } else {
+        setIsConnected(false);
+        setTestResult(`Greška: ${data.message}`);
+      }
+    } catch (error) {
+      setIsConnected(false);
+      setTestResult("Greška pri povezivanju sa bazom");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h3 className="text-lg font-semibold text-gray-900">
+          Povezivanje sa MS SQL Bazom
+        </h3>
+        <p className="text-sm text-gray-600 mt-1">
+          Konfigurišite konekciju sa Microsoft SQL Server bazom podataka
+        </p>
+      </div>
+      <div className="p-6">
+        <div className="space-y-4 max-w-2xl">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Server
+            </label>
+            <input
+              type="text"
+              value={dbConfig.server}
+              onChange={(e) =>
+                setDbConfig({ ...dbConfig, server: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="localhost ili IP adresa"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Baza podataka
+            </label>
+            <input
+              type="text"
+              value={dbConfig.database}
+              onChange={(e) =>
+                setDbConfig({ ...dbConfig, database: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ime baze podataka"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Korisničko ime
+              </label>
+              <input
+                type="text"
+                value={dbConfig.username}
+                onChange={(e) =>
+                  setDbConfig({ ...dbConfig, username: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="sa"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Lozinka
+              </label>
+              <input
+                type="password"
+                value={dbConfig.password}
+                onChange={(e) =>
+                  setDbConfig({ ...dbConfig, password: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Port
+            </label>
+            <input
+              type="text"
+              value={dbConfig.port}
+              onChange={(e) =>
+                setDbConfig({ ...dbConfig, port: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="1433"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={handleTestConnection}
+              disabled={isLoading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Testiranje..." : "Testiraj konekciju"}
+            </button>
+          </div>
+
+          {testResult && (
+            <div
+              className={`p-4 rounded-lg ${
+                isConnected
+                  ? "bg-green-50 border border-green-200"
+                  : "bg-red-50 border border-red-200"
+              }`}
+            >
+              <p
+                className={`text-sm ${
+                  isConnected ? "text-green-800" : "text-red-800"
+                }`}
+              >
+                {testResult}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Napomena:</strong> Konfiguracija baze se čuva u environment
+              varijablama (.env.local fajl). Za promene na produkciji, ažurirajte
+              environment varijable na serveru i restartujte aplikaciju.
+            </p>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-semibold text-blue-900 mb-2">
+              Environment Varijable:
+            </h4>
+            <ul className="text-sm text-blue-800 space-y-1 font-mono">
+              <li>DB_SERVER={dbConfig.server || "localhost"}</li>
+              <li>DB_NAME={dbConfig.database || "your_database"}</li>
+              <li>DB_USER={dbConfig.username || "sa"}</li>
+              <li>DB_PASSWORD=***</li>
+              <li>DB_PORT={dbConfig.port || "1433"}</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
