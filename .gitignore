@@ -44,3 +44,6 @@ android/
 
 # Expo log
 expo.log
+*.zip
+*.bundle
+*.tar.gz
