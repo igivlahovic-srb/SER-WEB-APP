@@ -11,6 +11,7 @@ import ScannerScreen from "../screens/ScannerScreen";
 import ServiceTicketScreen from "../screens/ServiceTicketScreen";
 import HistoryScreen from "../screens/HistoryScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import UserManagementScreen from "../screens/UserManagementScreen";
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -21,6 +22,7 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Dashboard: undefined;
   History: undefined;
+  UserManagement?: undefined;
   Profile: undefined;
 };
 
@@ -29,6 +31,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function MainTabs() {
   const userRole = useAuthStore((s) => s.user?.role);
+  const isSuperUser = userRole === "super_user";
 
   return (
     <Tab.Navigator
@@ -80,6 +83,19 @@ function MainTabs() {
           ),
         }}
       />
+      {isSuperUser && (
+        <Tab.Screen
+          name="UserManagement"
+          component={UserManagementScreen}
+          options={{
+            title: "Upravljanje korisnicima",
+            tabBarLabel: "Korisnici",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="people" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

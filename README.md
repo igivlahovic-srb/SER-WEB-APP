@@ -12,6 +12,26 @@ Water Service App je moderan sistem za upravljanje servisnim radovima na water a
 - **Prijava sa ulogama**: Dva nivoa pristupa (Super User i Serviser)
 - **Perzistentna sesija**: Automatsko čuvanje prijavljenog korisnika
 - **Demo pristup**: Unapred konfigurisani nalozi za testiranje
+- **Aktivni/Neaktivni korisnici**: Admini mogu deaktivirati naloge bez brisanja
+
+### 👥 Upravljanje korisnicima (Super User)
+- **Dodavanje korisnika**: Kreiranje novih servisera ili administratora
+  - Unos korisničkog imena, lozinke, imena
+  - Izbor uloge (Serviser/Administrator)
+  - Automatski aktivni po default-u
+- **Izmena korisnika**: Ažuriranje informacija postojećih korisnika
+  - Promena imena i prezimena
+  - Promena uloge
+  - Reset lozinke
+- **Deaktivacija/Aktivacija**: Privremeno onemogućavanje pristupa
+  - Zadržavanje podataka u sistemu
+  - Brza reaktivacija po potrebi
+  - Zaštita - ne može se deaktivirati sopstveni nalog
+- **Brisanje korisnika**: Trajno uklanjanje korisnika iz sistema
+  - Potvrda pre brisanja
+  - Zaštita - ne može se obrisati sopstveni nalog
+- **Pregled statistike**: Ukupno, aktivnih i neaktivnih korisnika
+- **Lista korisnika**: Pregled svih korisnika sa statusima i ulogama
 
 ### 📊 Kontrolna tabla (Dashboard)
 - **Personalizovani pozdrav**: Prikaz imena i uloge korisnika
@@ -149,14 +169,22 @@ src/
 ### Za super usera:
 1. Prijava sa naloga
 2. Pregled kontrolne table sa svim statistikama
-3. Uvid u sve servise svih servisera
-4. Analiza istorije i performansi
+3. **Upravljanje korisnicima** (novi tab):
+   - Dodavanje novih servisera/administratora
+   - Izmena postojećih korisnika
+   - Deaktivacija/aktivacija naloga
+   - Brisanje korisnika
+4. Uvid u sve servise svih servisera
+5. Analiza istorije i performansi
 
 ## 📝 Napomene
 
-- Aplikacija koristi mock podatke za autentifikaciju (u produkciji bi se koristio backend API)
-- Servisni nalozi se čuvaju lokalno u AsyncStorage
-- QR kodovi moraju biti validan format (bilo koji QR kod se može skenirati za demo)
+- Aplikacija koristi perzistentno čuvanje podataka (AsyncStorage)
+- Korisnici, servisi i podaci se čuvaju lokalno
+- Super admini imaju poseban tab "Korisnici" za upravljanje korisnicima
+- Neaktivni korisnici ne mogu da se prijave
+- Korisnik ne može da obriše ili deaktivira sam sebe
+- QR kodovi moraju biti validan format (bilo koji QR/EAN kod se može skenirati za demo)
 - Aplikacija je optimizovana za iOS
 
 ## 🔄 Buduća poboljšanja
