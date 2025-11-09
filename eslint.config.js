@@ -18,6 +18,7 @@ module.exports = defineConfig([
       "web-admin/**/*",
       ".next/**/*",
       "node_modules/**/*",
+      "convert-icon.js",
     ],
     settings: {
       "import/resolver": {
