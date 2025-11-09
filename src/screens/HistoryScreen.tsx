@@ -12,8 +12,31 @@ export default function HistoryScreen() {
   const [showDateFilter, setShowDateFilter] = useState(false);
 
   // Default to last 7 days
-  const [dateFrom, setDateFrom] = useState(format(subDays(new Date(), 7), "yyyy-MM-dd"));
-  const [dateTo, setDateTo] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [dateFrom, setDateFrom] = useState(subDays(new Date(), 7));
+  const [dateTo, setDateTo] = useState(new Date());
+
+  // Temporary string states for text input
+  const [dateFromStr, setDateFromStr] = useState(format(dateFrom, "yyyy-MM-dd"));
+  const [dateToStr, setDateToStr] = useState(format(dateTo, "yyyy-MM-dd"));
+
+  const applyDateFilter = () => {
+    try {
+      const parsedFrom = parseISO(dateFromStr);
+      const parsedTo = parseISO(dateToStr);
+      if (!isNaN(parsedFrom.getTime())) setDateFrom(parsedFrom);
+      if (!isNaN(parsedTo.getTime())) setDateTo(parsedTo);
+    } catch (error) {
+      // Invalid date format, keep current dates
+    }
+    setShowDateFilter(false);
+  };
+
+  const setQuickFilter = (from: Date, to: Date) => {
+    setDateFrom(from);
+    setDateTo(to);
+    setDateFromStr(format(from, "yyyy-MM-dd"));
+    setDateToStr(format(to, "yyyy-MM-dd"));
+  };
 
   const filteredTickets = tickets.filter((ticket) => {
     // Status filter
@@ -21,8 +44,8 @@ export default function HistoryScreen() {
 
     // Date filter
     const ticketDate = startOfDay(new Date(ticket.startTime));
-    const fromDate = startOfDay(parseISO(dateFrom));
-    const toDate = endOfDay(parseISO(dateTo));
+    const fromDate = startOfDay(dateFrom);
+    const toDate = endOfDay(dateTo);
 
     return ticketDate >= fromDate && ticketDate <= toDate;
   }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
@@ -165,7 +188,7 @@ export default function HistoryScreen() {
           <View className="flex-row items-center gap-2">
             <Ionicons name="calendar-outline" size={20} color="#6B7280" />
             <Text className="text-gray-700 text-sm font-medium">
-              {format(parseISO(dateFrom), "dd.MM.yyyy")} - {format(parseISO(dateTo), "dd.MM.yyyy")}
+              {format(dateFrom, "dd.MM.yyyy")} - {format(dateTo, "dd.MM.yyyy")}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
@@ -203,8 +226,8 @@ export default function HistoryScreen() {
                 <TextInput
                   className="flex-1 ml-3 text-gray-900 text-base"
                   placeholder="YYYY-MM-DD"
-                  value={dateFrom}
-                  onChangeText={setDateFrom}
+                  value={dateFromStr}
+                  onChangeText={setDateFromStr}
                   keyboardType="numbers-and-punctuation"
                 />
               </View>
@@ -220,8 +243,8 @@ export default function HistoryScreen() {
                 <TextInput
                   className="flex-1 ml-3 text-gray-900 text-base"
                   placeholder="YYYY-MM-DD"
-                  value={dateTo}
-                  onChangeText={setDateTo}
+                  value={dateToStr}
+                  onChangeText={setDateToStr}
                   keyboardType="numbers-and-punctuation"
                 />
               </View>
@@ -234,10 +257,7 @@ export default function HistoryScreen() {
               </Text>
               <View className="gap-2">
                 <Pressable
-                  onPress={() => {
-                    setDateFrom(format(subDays(new Date(), 7), "yyyy-MM-dd"));
-                    setDateTo(format(new Date(), "yyyy-MM-dd"));
-                  }}
+                  onPress={() => setQuickFilter(subDays(new Date(), 7), new Date())}
                   className="bg-blue-50 rounded-xl px-4 py-3"
                 >
                   <Text className="text-blue-600 text-sm font-semibold">
@@ -245,10 +265,7 @@ export default function HistoryScreen() {
                   </Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => {
-                    setDateFrom(format(subDays(new Date(), 30), "yyyy-MM-dd"));
-                    setDateTo(format(new Date(), "yyyy-MM-dd"));
-                  }}
+                  onPress={() => setQuickFilter(subDays(new Date(), 30), new Date())}
                   className="bg-blue-50 rounded-xl px-4 py-3"
                 >
                   <Text className="text-blue-600 text-sm font-semibold">
@@ -256,10 +273,7 @@ export default function HistoryScreen() {
                   </Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => {
-                    setDateFrom(format(subDays(new Date(), 90), "yyyy-MM-dd"));
-                    setDateTo(format(new Date(), "yyyy-MM-dd"));
-                  }}
+                  onPress={() => setQuickFilter(subDays(new Date(), 90), new Date())}
                   className="bg-blue-50 rounded-xl px-4 py-3"
                 >
                   <Text className="text-blue-600 text-sm font-semibold">
@@ -271,7 +285,7 @@ export default function HistoryScreen() {
 
             {/* Apply Button */}
             <Pressable
-              onPress={() => setShowDateFilter(false)}
+              onPress={applyDateFilter}
               className="bg-blue-600 rounded-xl py-4 items-center"
             >
               <Text className="text-white text-base font-semibold">
