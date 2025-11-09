@@ -67,9 +67,6 @@ export default function LoginScreen() {
                 <Text className="text-blue-100 text-base text-center font-medium">
                   Servisni Modul
                 </Text>
-                <Text className="text-blue-200 text-sm text-center mt-2">
-                  Sistem za održavanje water aparata
-                </Text>
               </View>
 
               {/* Login Form */}
