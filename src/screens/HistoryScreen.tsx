@@ -1,17 +1,30 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Modal, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useServiceStore } from "../state/serviceStore";
-import { format } from "date-fns";
+import { format, subDays, startOfDay, endOfDay, parseISO } from "date-fns";
 import { ServiceTicket } from "../types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HistoryScreen() {
   const tickets = useServiceStore((s) => s.tickets);
   const [filter, setFilter] = useState<"all" | "completed" | "in_progress">("all");
+  const [showDateFilter, setShowDateFilter] = useState(false);
+
+  // Default to last 7 days
+  const [dateFrom, setDateFrom] = useState(format(subDays(new Date(), 7), "yyyy-MM-dd"));
+  const [dateTo, setDateTo] = useState(format(new Date(), "yyyy-MM-dd"));
 
   const filteredTickets = tickets.filter((ticket) => {
-    if (filter === "all") return true;
-    return ticket.status === filter;
+    // Status filter
+    if (filter !== "all" && ticket.status !== filter) return false;
+
+    // Date filter
+    const ticketDate = startOfDay(new Date(ticket.startTime));
+    const fromDate = startOfDay(parseISO(dateFrom));
+    const toDate = endOfDay(parseISO(dateTo));
+
+    return ticketDate >= fromDate && ticketDate <= toDate;
   }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
   const renderTicketCard = (ticket: ServiceTicket) => (
@@ -99,7 +112,7 @@ export default function HistoryScreen() {
     <View className="flex-1 bg-gray-50">
       {/* Filter Tabs */}
       <View className="bg-white px-6 py-4 border-b border-gray-200">
-        <View className="flex-row gap-2">
+        <View className="flex-row gap-2 mb-3">
           <Pressable
             onPress={() => setFilter("all")}
             className={`flex-1 py-3 rounded-xl ${
@@ -143,7 +156,131 @@ export default function HistoryScreen() {
             </Text>
           </Pressable>
         </View>
+
+        {/* Date Filter */}
+        <Pressable
+          onPress={() => setShowDateFilter(true)}
+          className="flex-row items-center justify-between bg-gray-50 rounded-xl px-4 py-3"
+        >
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+            <Text className="text-gray-700 text-sm font-medium">
+              {format(parseISO(dateFrom), "dd.MM.yyyy")} - {format(parseISO(dateTo), "dd.MM.yyyy")}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+        </Pressable>
       </View>
+
+      {/* Date Filter Modal */}
+      <Modal
+        visible={showDateFilter}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowDateFilter(false)}
+      >
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
+            <Text className="text-gray-900 text-xl font-bold">
+              Filter po datumu
+            </Text>
+            <Pressable
+              onPress={() => setShowDateFilter(false)}
+              className="w-8 h-8 items-center justify-center"
+            >
+              <Ionicons name="close" size={28} color="#6B7280" />
+            </Pressable>
+          </View>
+
+          <ScrollView className="flex-1 px-6 py-6">
+            {/* Date From */}
+            <View className="mb-6">
+              <Text className="text-gray-700 text-sm font-semibold mb-2">
+                Od datuma:
+              </Text>
+              <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+                <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+                <TextInput
+                  className="flex-1 ml-3 text-gray-900 text-base"
+                  placeholder="YYYY-MM-DD"
+                  value={dateFrom}
+                  onChangeText={setDateFrom}
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+            </View>
+
+            {/* Date To */}
+            <View className="mb-6">
+              <Text className="text-gray-700 text-sm font-semibold mb-2">
+                Do datuma:
+              </Text>
+              <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+                <Ionicons name="calendar-outline" size={20} color="#6B7280" />
+                <TextInput
+                  className="flex-1 ml-3 text-gray-900 text-base"
+                  placeholder="YYYY-MM-DD"
+                  value={dateTo}
+                  onChangeText={setDateTo}
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+            </View>
+
+            {/* Quick Filters */}
+            <View className="mb-6">
+              <Text className="text-gray-700 text-sm font-semibold mb-3">
+                Brzi filteri:
+              </Text>
+              <View className="gap-2">
+                <Pressable
+                  onPress={() => {
+                    setDateFrom(format(subDays(new Date(), 7), "yyyy-MM-dd"));
+                    setDateTo(format(new Date(), "yyyy-MM-dd"));
+                  }}
+                  className="bg-blue-50 rounded-xl px-4 py-3"
+                >
+                  <Text className="text-blue-600 text-sm font-semibold">
+                    Poslednjih 7 dana
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setDateFrom(format(subDays(new Date(), 30), "yyyy-MM-dd"));
+                    setDateTo(format(new Date(), "yyyy-MM-dd"));
+                  }}
+                  className="bg-blue-50 rounded-xl px-4 py-3"
+                >
+                  <Text className="text-blue-600 text-sm font-semibold">
+                    Poslednjih 30 dana
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setDateFrom(format(subDays(new Date(), 90), "yyyy-MM-dd"));
+                    setDateTo(format(new Date(), "yyyy-MM-dd"));
+                  }}
+                  className="bg-blue-50 rounded-xl px-4 py-3"
+                >
+                  <Text className="text-blue-600 text-sm font-semibold">
+                    Poslednjih 90 dana
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Apply Button */}
+            <Pressable
+              onPress={() => setShowDateFilter(false)}
+              className="bg-blue-600 rounded-xl py-4 items-center"
+            >
+              <Text className="text-white text-base font-semibold">
+                Primeni filter
+              </Text>
+            </Pressable>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
 
       {/* Tickets List */}
       <ScrollView className="flex-1 px-6 py-4">
