@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, ServiceTicket } from "../../types";
 import { format } from "date-fns";
+import UpdateNotification from "../../components/UpdateNotification";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<Omit<User, "password"> | null>(null);
@@ -104,6 +105,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Update Notification */}
+      <UpdateNotification />
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
