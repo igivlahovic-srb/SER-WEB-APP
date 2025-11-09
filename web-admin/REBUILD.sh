@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Complete rebuild script for Ubuntu server
+# Run this when JavaScript files are not loading
+
+set -e
+
+echo "================================================"
+echo "La Fantana WHS - Complete Rebuild"
+echo "================================================"
+echo ""
+
+cd ~/webadminportal/web-admin
+
+echo "Step 1/5: Stopping PM2 process..."
+pm2 stop lafantana-whs-admin 2>/dev/null || true
+pm2 stop water-service-web-admin 2>/dev/null || true
+pm2 delete lafantana-whs-admin 2>/dev/null || true
+pm2 delete water-service-web-admin 2>/dev/null || true
+echo "✓ PM2 stopped"
+echo ""
+
+echo "Step 2/5: Cleaning old build files..."
+rm -rf .next
+rm -rf node_modules
+rm -rf bun.lock
+echo "✓ Cleaned"
+echo ""
+
+echo "Step 3/5: Installing dependencies..."
+bun install
+if [ $? -ne 0 ]; then
+    echo "Error installing dependencies!"
+    exit 1
+fi
+echo "✓ Dependencies installed"
+echo ""
+
+echo "Step 4/5: Building application..."
+bun run build
+if [ $? -ne 0 ]; then
+    echo "Error building application!"
+    exit 1
+fi
+echo "✓ Build completed"
+echo ""
+
+echo "Step 5/5: Starting PM2..."
+pm2 start "bun run start" --name lafantana-whs-admin
+pm2 save
+echo "✓ PM2 started"
+echo ""
+
+# Wait and check
+sleep 3
+
+echo "================================================"
+echo "Checking status..."
+echo "================================================"
+pm2 status
+
+echo ""
+echo "Testing server..."
+curl -s http://localhost:3002 > /dev/null && echo "✓ Server is responding!" || echo "✗ Server is not responding"
+
+echo ""
+echo "View logs with: pm2 logs lafantana-whs-admin"
+echo ""
