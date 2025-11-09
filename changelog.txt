@@ -53,3 +53,18 @@
 - Changes made by agent 2025-11-09T12:31:07Z
 - Changes made by agent 2025-11-09T14:23:14Z
 - Changes made by agent 2025-11-09T14:23:58Z
+- [2025-11-09] DODATA UBUNTU 22.04 INSTALACIONA DOKUMENTACIJA:
+  * Kreiran web-admin/UBUNTU_INSTALL.md - kompletan korak-po-korak vodič za instalaciju na Ubuntu serveru
+  * Kreiran web-admin/install-ubuntu.sh - automatski instalacioni script koji instalira sve potrebno
+  * Kreiran web-admin/QUICK_START.md - brzi vodič za iskusne korisnike
+  * Kreiran web-admin/INSTALL_CHECKLIST.md - checklist za praćenje instalacije
+  * Kreiran web-admin/SYSTEMD_SERVICE.md - alternativa za PM2 koristeći systemd
+  * Kreiran web-admin/DOCUMENTATION_INDEX.md - centralni indeks svih dokumenata
+  * Kreiran web-admin/START_HERE.md - početna tačka za nove korisnike
+  * Kreiran web-admin/test-deployment.sh - script za testiranje pre produkcije (10 kategorija testova)
+  * Ažuriran web-admin/README.md sa uputstvima za Ubuntu instalaciju
+  * Ažuriran glavni README.md sa linkovima ka instalacionim dokumentima
+  * Instalacioni script pokriva: Node.js, Bun, npm pakete, production build, firewall, PM2, Nginx
+  * Instalirane web-admin zavisnosti (bun install) - Next.js 15, React 18, TypeScript, Tailwind CSS
+  * KOMPLETAN DEPLOYMENT PAKET - od fresh Ubuntu 22.04 do production-ready sistema!
+- Changes made by agent 2025-11-09T14:36:58Z

@@ -204,13 +204,31 @@ Water Service aplikacija sada dolazi sa **kompletnim web admin panelom** koji om
 
 ### Pokretanje Web Admin Panela
 
+#### Na lokalnom računaru (Development):
 ```bash
 cd web-admin
 bun install
 bun dev
 ```
-
 Web panel će biti dostupan na: `http://localhost:3000`
+
+#### Na Ubuntu 22.04 serveru (Production):
+```bash
+# Prebaci web-admin folder na server
+scp -r web-admin/ user@server-ip:/home/user/
+
+# SSH na server i pokreni instalacioni script
+ssh user@server-ip
+cd ~/web-admin
+chmod +x install-ubuntu.sh
+./install-ubuntu.sh
+```
+
+**Detaljne instalacione uputstva:**
+- 📖 `web-admin/UBUNTU_INSTALL.md` - Potpuna korak-po-korak dokumentacija
+- ⚡ `web-admin/QUICK_START.md` - Brza instalacija za iskusne korisnike
+
+Instalacioni script automatski instalira Node.js, Bun, sve pakete, pravi build, konfiguriše firewall i opciono instalira PM2 i Nginx.
 
 ### Sinhronizacija podataka
 

@@ -32,20 +32,47 @@ Web administrativna aplikacija za upravljanje i pregled podataka iz La Fantana W
 
 ## 🚀 Kako pokrenuti
 
-### Instalacija
+### Na lokalnom računaru (Development)
 
 ```bash
 cd web-admin
 bun install
-```
-
-### Pokretanje development servera
-
-```bash
 bun dev
 ```
 
 Aplikacija će biti dostupna na `http://localhost:3000`
+
+### 🖥️ Na Ubuntu 22.04 serveru (Production)
+
+**Brza automatska instalacija:**
+```bash
+# Prebaci web-admin folder na server
+scp -r web-admin/ user@server-ip:/home/user/
+
+# SSH na server
+ssh user@server-ip
+
+# Pokreni instalacioni script
+cd ~/web-admin
+chmod +x install-ubuntu.sh
+./install-ubuntu.sh
+```
+
+**📚 Instalaciona dokumentacija:**
+- 📑 **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Pregled svih dokumenata
+- 📖 **[UBUNTU_INSTALL.md](./UBUNTU_INSTALL.md)** - Potpuna korak-po-korak dokumentacija
+- ⚡ **[QUICK_START.md](./QUICK_START.md)** - Brza instalacija za iskusne korisnike
+- ✅ **[INSTALL_CHECKLIST.md](./INSTALL_CHECKLIST.md)** - Checklist za praćenje progresa
+- ⚙️ **[SYSTEMD_SERVICE.md](./SYSTEMD_SERVICE.md)** - Systemd alternativa za PM2
+
+Instalacioni script automatski instalira sve što je potrebno:
+- Node.js 20.x LTS
+- Bun package manager
+- Sve npm pakete i zavisnosti
+- Build aplikacije za produkciju
+- Firewall konfiguraciju (port 3002)
+- PM2 process manager (opciono)
+- Nginx reverse proxy (opciono)
 
 ### 🔍 Dijagnostika problema sa konekcijom
 
