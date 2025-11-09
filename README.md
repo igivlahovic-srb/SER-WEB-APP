@@ -20,10 +20,18 @@ Water Service App je moderan sistem za upravljanje servisnim radovima na water a
 - **Nedavna aktivnost**: Pregled poslednjih servisa
 
 ### 📷 QR Skener
-- **Brzo skeniranje**: Automatsko otvaranje servisnog naloga nakon skeniranja
-- **Manuelni unos**: Opcija za ručno unošenje šifre aparata
+- **Univerzalno skeniranje**: Automatsko otvaranje servisnog naloga
+  - QR kodovi
+  - EAN13 i EAN8 kodovi
+  - 2D kodovi (DataMatrix, PDF417)
+  - Code128, Code39, Code93
+- **Ručni unos**: Elegantna forma za manuelno unošenje šifre
+  - Validacija unosa
+  - Brojač karaktera
+  - Automatski fokus
+  - Clear dugme
 - **Dozvole kamere**: Intuitivan prikaz za zahtevanje pristupa kameri
-- **Vizuelni indikatori**: Okvir za precizno pozicioniranje QR koda
+- **Vizuelni indikatori**: Okvir za precizno pozicioniranje koda
 
 ### 🔧 Servisni nalog
 - **Dodavanje operacija**: Izbor iz liste predefinisanih servisnih operacija

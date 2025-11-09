@@ -5,6 +5,11 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -27,6 +32,8 @@ export default function ScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualCode, setManualCode] = useState("");
   const navigation = useNavigation<NavigationProp>();
 
   const addTicket = useServiceStore((s) => s.addTicket);
@@ -97,15 +104,10 @@ export default function ScannerScreen() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
-  const handleManualEntry = () => {
-    // For now, create a demo ticket with manual code
-    const demoCode = `WD-${Math.floor(Math.random() * 10000)
-      .toString()
-      .padStart(4, "0")}`;
-
+  const createTicketWithCode = (code: string) => {
     const newTicket: ServiceTicket = {
       id: Date.now().toString(),
-      deviceCode: demoCode,
+      deviceCode: code,
       technicianId: user?.id || "",
       technicianName: user?.name || "",
       startTime: new Date(),
@@ -119,6 +121,19 @@ export default function ScannerScreen() {
     navigation.navigate("ServiceTicket");
   };
 
+  const handleManualEntry = () => {
+    setShowManualEntry(true);
+  };
+
+  const handleManualSubmit = () => {
+    if (manualCode.trim()) {
+      Keyboard.dismiss();
+      setShowManualEntry(false);
+      createTicketWithCode(manualCode.trim());
+      setManualCode("");
+    }
+  };
+
   return (
     <View className="flex-1 bg-black">
       <CameraView
@@ -126,7 +141,16 @@ export default function ScannerScreen() {
         facing={facing}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
+          barcodeTypes: [
+            "qr",
+            "ean13",
+            "ean8",
+            "code128",
+            "code39",
+            "code93",
+            "datamatrix",
+            "pdf417",
+          ],
         }}
       />
 
@@ -173,10 +197,10 @@ export default function ScannerScreen() {
           </View>
 
           <Text className="text-white text-lg font-medium mt-8 text-center px-8">
-            Skenirajte QR kod water aparata
+            Skenirajte kod water aparata
           </Text>
           <Text className="text-gray-300 text-sm mt-2 text-center px-8">
-            Pozicionirajte QR kod unutar okvira
+            Podržava QR, EAN13, EAN8 i 2D kodove
           </Text>
         </View>
 
@@ -194,6 +218,103 @@ export default function ScannerScreen() {
           </View>
         </SafeAreaView>
       </View>
+
+      {/* Manual Entry Modal */}
+      <Modal
+        visible={showManualEntry}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowManualEntry(false)}
+      >
+        <SafeAreaView className="flex-1 bg-white">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1"
+          >
+            {/* Header */}
+            <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-200">
+              <Text className="text-gray-900 text-xl font-bold">
+                Ručni unos šifre
+              </Text>
+              <Pressable
+                onPress={() => {
+                  setShowManualEntry(false);
+                  setManualCode("");
+                }}
+                className="w-8 h-8 items-center justify-center"
+              >
+                <Ionicons name="close" size={28} color="#6B7280" />
+              </Pressable>
+            </View>
+
+            {/* Content */}
+            <View className="flex-1 px-6 py-8">
+              <View className="bg-blue-50 rounded-2xl p-4 flex-row items-start gap-3 mb-6">
+                <Ionicons name="information-circle" size={24} color="#3B82F6" />
+                <Text className="flex-1 text-blue-900 text-sm">
+                  Unesite identifikacionu šifru water aparata. Ovo može biti
+                  EAN kod, serijski broj ili bilo koji identifikator.
+                </Text>
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-gray-700 text-sm font-semibold mb-2">
+                  Šifra aparata
+                </Text>
+                <View className="flex-row items-center bg-gray-50 rounded-xl px-4 py-4 border-2 border-gray-200">
+                  <Ionicons name="keypad-outline" size={24} color="#6B7280" />
+                  <TextInput
+                    className="flex-1 ml-3 text-gray-900 text-lg"
+                    placeholder="npr. 8901234567890"
+                    placeholderTextColor="#9CA3AF"
+                    value={manualCode}
+                    onChangeText={setManualCode}
+                    autoFocus
+                    autoCapitalize="characters"
+                    returnKeyType="done"
+                    onSubmitEditing={handleManualSubmit}
+                  />
+                  {manualCode.length > 0 && (
+                    <Pressable
+                      onPress={() => setManualCode("")}
+                      className="w-8 h-8 items-center justify-center"
+                    >
+                      <Ionicons
+                        name="close-circle"
+                        size={20}
+                        color="#9CA3AF"
+                      />
+                    </Pressable>
+                  )}
+                </View>
+                {manualCode.length > 0 && (
+                  <Text className="text-gray-500 text-xs mt-2">
+                    {manualCode.length} karaktera
+                  </Text>
+                )}
+              </View>
+
+              <Pressable
+                onPress={handleManualSubmit}
+                disabled={!manualCode.trim()}
+                className={`rounded-2xl px-6 py-4 ${
+                  manualCode.trim()
+                    ? "bg-blue-600 active:opacity-80"
+                    : "bg-gray-200"
+                }`}
+              >
+                <Text
+                  className={`text-center text-base font-bold ${
+                    manualCode.trim() ? "text-white" : "text-gray-400"
+                  }`}
+                >
+                  Kreiraj servisni nalog
+                </Text>
+              </Pressable>
+            </View>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
