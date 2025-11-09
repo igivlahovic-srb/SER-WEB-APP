@@ -78,9 +78,9 @@ export default function ScannerScreen() {
     setScanned(true);
     setProcessing(true);
 
-    // Create new service ticket
+    // Create new service ticket with unique ID
     const newTicket: ServiceTicket = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       deviceCode: data,
       technicianId: user?.id || "",
       technicianName: user?.name || "",
@@ -93,10 +93,15 @@ export default function ScannerScreen() {
     addTicket(newTicket);
     setCurrentTicket(newTicket);
 
-    // Navigate to service ticket screen
+    // Close scanner modal and navigate to service ticket screen
     setTimeout(() => {
       setProcessing(false);
-      navigation.navigate("ServiceTicket");
+      setScanned(false);
+      navigation.goBack(); // Close scanner modal
+      // Navigate to ServiceTicket after modal closes
+      setTimeout(() => {
+        navigation.navigate("ServiceTicket");
+      }, 100);
     }, 500);
   };
 
@@ -106,7 +111,7 @@ export default function ScannerScreen() {
 
   const createTicketWithCode = (code: string) => {
     const newTicket: ServiceTicket = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       deviceCode: code,
       technicianId: user?.id || "",
       technicianName: user?.name || "",
@@ -118,7 +123,13 @@ export default function ScannerScreen() {
 
     addTicket(newTicket);
     setCurrentTicket(newTicket);
-    navigation.navigate("ServiceTicket");
+
+    // Close scanner modal first
+    navigation.goBack();
+    // Navigate to ServiceTicket after modal closes
+    setTimeout(() => {
+      navigation.navigate("ServiceTicket");
+    }, 100);
   };
 
   const handleManualEntry = () => {
