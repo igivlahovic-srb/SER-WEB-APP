@@ -25,15 +25,18 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
+      console.log("Login response:", data);
 
       if (data.success && data.data.user) {
         // Store user in session storage
         sessionStorage.setItem("admin-user", JSON.stringify(data.data.user));
+        console.log("User stored, redirecting to dashboard...");
         router.push("/dashboard");
       } else {
         setError(data.message || "Pogrešni kredencijali ili nemate admin pristup");
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Greška pri povezivanju. Proverite da li je mobilna aplikacija sinhronizovala korisnike.");
     } finally {
       setLoading(false);
