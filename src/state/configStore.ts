@@ -31,8 +31,39 @@ export const useConfigStore = create<ConfigState>()(
         try {
           const apiUrl = useSyncStore.getState().apiUrl;
 
+          // If no API URL is configured, use default mock data
+          if (!apiUrl || apiUrl === "http://192.168.1.100:3000") {
+            console.warn("No valid API URL configured. Using default data.");
+            set({
+              operations: [
+                { id: "1", code: "OP-001", name: "Čišćenje rezervoara", description: "Kompletno čišćenje rezervoara za vodu", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "2", code: "OP-002", name: "Zamena filtera", description: "Zamena filter uloška", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "3", code: "OP-003", name: "Provera slavina", description: "Provera funkcionalnosti slavina", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "4", code: "OP-004", name: "Provera sistema hlađenja", description: "Provera hladnjaka i kompresora", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "5", code: "OP-005", name: "Provera grejača", description: "Provera funkcije grejanja vode", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "6", code: "OP-006", name: "Zamena cevi", description: "Zamena silikonskih cevi", isActive: true, createdAt: new Date("2024-01-01") },
+              ],
+              spareParts: [
+                { id: "1", code: "RD-001", name: "Filter uložak", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "2", code: "RD-002", name: "Slavina za hladnu vodu", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "3", code: "RD-003", name: "Slavina za toplu vodu", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "4", code: "RD-004", name: "Silikonske cevi", unit: "m", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "5", code: "RD-005", name: "Grejač", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+                { id: "6", code: "RD-006", name: "Termostat", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+              ],
+              lastConfigSync: new Date(),
+              isLoading: false,
+            });
+            return true;
+          }
+
           // Fetch operations
-          const opsResponse = await fetch(`${apiUrl}/api/config/operations`);
+          const opsResponse = await fetch(`${apiUrl}/api/config/operations`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
           const opsData = await opsResponse.json();
 
           if (!opsData.success) {
@@ -41,7 +72,12 @@ export const useConfigStore = create<ConfigState>()(
           }
 
           // Fetch spare parts
-          const partsResponse = await fetch(`${apiUrl}/api/config/spare-parts`);
+          const partsResponse = await fetch(`${apiUrl}/api/config/spare-parts`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
           const partsData = await partsResponse.json();
 
           if (!partsData.success) {
@@ -59,7 +95,28 @@ export const useConfigStore = create<ConfigState>()(
           return true;
         } catch (error) {
           console.error("Error fetching config:", error);
-          set({ isLoading: false });
+
+          // Fallback to default data if fetch fails
+          set({
+            operations: [
+              { id: "1", code: "OP-001", name: "Čišćenje rezervoara", description: "Kompletno čišćenje rezervoara za vodu", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "2", code: "OP-002", name: "Zamena filtera", description: "Zamena filter uloška", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "3", code: "OP-003", name: "Provera slavina", description: "Provera funkcionalnosti slavina", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "4", code: "OP-004", name: "Provera sistema hlađenja", description: "Provera hladnjaka i kompresora", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "5", code: "OP-005", name: "Provera grejača", description: "Provera funkcije grejanja vode", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "6", code: "OP-006", name: "Zamena cevi", description: "Zamena silikonskih cevi", isActive: true, createdAt: new Date("2024-01-01") },
+            ],
+            spareParts: [
+              { id: "1", code: "RD-001", name: "Filter uložak", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "2", code: "RD-002", name: "Slavina za hladnu vodu", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "3", code: "RD-003", name: "Slavina za toplu vodu", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "4", code: "RD-004", name: "Silikonske cevi", unit: "m", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "5", code: "RD-005", name: "Grejač", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+              { id: "6", code: "RD-006", name: "Termostat", unit: "kom", isActive: true, createdAt: new Date("2024-01-01") },
+            ],
+            lastConfigSync: new Date(),
+            isLoading: false,
+          });
           return false;
         }
       },
