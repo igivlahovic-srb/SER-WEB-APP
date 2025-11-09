@@ -68,3 +68,4 @@
   * Instalirane web-admin zavisnosti (bun install) - Next.js 15, React 18, TypeScript, Tailwind CSS
   * KOMPLETAN DEPLOYMENT PAKET - od fresh Ubuntu 22.04 do production-ready sistema!
 - Changes made by agent 2025-11-09T14:36:58Z
+- Changes made by agent 2025-11-09T14:46:25Z
