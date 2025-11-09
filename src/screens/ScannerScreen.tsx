@@ -190,9 +190,10 @@ export default function ScannerScreen() {
 
       {/* Overlay UI */}
       <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-        {/* Header */}
-        <SafeAreaView edges={["top"]} style={{ zIndex: 100 }}>
-          <View className="px-4 py-3 flex-row items-center justify-between">
+        {/* Scanning Frame */}
+        <View className="flex-1 items-center justify-center">
+          <View className="items-center">
+            {/* Cancel Button - Above scanner frame */}
             <Pressable
               onPress={() => {
                 if (!processing) {
@@ -200,50 +201,53 @@ export default function ScannerScreen() {
                 }
               }}
               disabled={processing}
-              className="w-12 h-12 items-center justify-center bg-black/70 rounded-full active:opacity-70"
+              className="bg-red-600 px-8 py-3 rounded-full mb-6 active:opacity-80"
               style={{ elevation: 5 }}
             >
-              <Ionicons name="close" size={28} color="#FFFFFF" />
+              <Text className="text-white text-base font-bold">
+                Odustani
+              </Text>
             </Pressable>
+
+            {/* QR Frame */}
+            <View className="relative">
+              <View className="w-64 h-64 border-2 border-white rounded-3xl">
+                {/* Corner decorations */}
+                <View className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-2xl" />
+                <View className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-2xl" />
+                <View className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-2xl" />
+                <View className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-2xl" />
+              </View>
+
+              {processing && (
+                <View className="absolute inset-0 items-center justify-center bg-black/60 rounded-3xl">
+                  <ActivityIndicator size="large" color="#3B82F6" />
+                  <Text className="text-white text-base font-medium mt-3">
+                    Procesiranje...
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <Text className="text-white text-lg font-medium mt-8 text-center px-8">
+              Skenirajte aparat
+            </Text>
+            <Text className="text-gray-300 text-sm mt-2 text-center px-8">
+              Podržava QR, EAN13, EAN8 i 2D kodove
+            </Text>
+
+            {/* Flip Camera Button - Below scanner frame */}
             <Pressable
               onPress={toggleCameraFacing}
               disabled={processing}
-              className="w-12 h-12 items-center justify-center bg-black/70 rounded-full active:opacity-70"
-              style={{ elevation: 5 }}
+              className="flex-row items-center gap-2 bg-white/20 backdrop-blur px-6 py-3 rounded-full mt-6 active:opacity-70"
             >
-              <Ionicons name="camera-reverse" size={28} color="#FFFFFF" />
+              <Ionicons name="camera-reverse" size={20} color="#FFFFFF" />
+              <Text className="text-white text-sm font-semibold">
+                Okreni kameru
+              </Text>
             </Pressable>
           </View>
-        </SafeAreaView>
-
-        {/* Scanning Frame */}
-        <View className="flex-1 items-center justify-center" pointerEvents="none">
-          <View className="relative">
-            {/* QR Frame */}
-            <View className="w-64 h-64 border-2 border-white rounded-3xl">
-              {/* Corner decorations */}
-              <View className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-2xl" />
-              <View className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-2xl" />
-              <View className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-2xl" />
-              <View className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-2xl" />
-            </View>
-
-            {processing && (
-              <View className="absolute inset-0 items-center justify-center bg-black/60 rounded-3xl">
-                <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="text-white text-base font-medium mt-3">
-                  Procesiranje...
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <Text className="text-white text-lg font-medium mt-8 text-center px-8">
-            Skenirajte aparat
-          </Text>
-          <Text className="text-gray-300 text-sm mt-2 text-center px-8">
-            Podržava QR, EAN13, EAN8 i 2D kodove
-          </Text>
         </View>
 
         {/* Bottom Actions */}
