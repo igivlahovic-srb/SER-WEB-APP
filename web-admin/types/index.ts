@@ -40,3 +40,20 @@ export interface SyncData {
   users?: User[];
   tickets?: ServiceTicket[];
 }
+
+// Configuration items (master data)
+export interface OperationTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date | string;
+}
+
+export interface SparePartTemplate {
+  id: string;
+  name: string;
+  unit: string; // e.g., "kom", "par", "set"
+  isActive: boolean;
+  createdAt: Date | string;
+}

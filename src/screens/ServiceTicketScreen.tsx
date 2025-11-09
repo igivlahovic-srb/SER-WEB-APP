@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,32 +7,15 @@ import {
   TextInput,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useServiceStore } from "../state/serviceStore";
+import { useConfigStore } from "../state/configStore";
 import { Operation, SparePart } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
-
-// Predefined operations and spare parts
-const AVAILABLE_OPERATIONS = [
-  { name: "Čišćenje rezervoara", description: "Potpuno čišćenje i dezinfekcija" },
-  { name: "Zamena filtera", description: "Zamena filter uloška" },
-  { name: "Provera slavina", description: "Kontrola i podmazivanje slavina" },
-  { name: "Provera sistema hlađenja", description: "Testiranje kompresorske jedinice" },
-  { name: "Provera grejača", description: "Testiranje grejnog elementa" },
-  { name: "Zamena cevi", description: "Zamena dotrajalih cevi" },
-];
-
-const AVAILABLE_SPARE_PARTS = [
-  { name: "Filter uložak" },
-  { name: "Slavina - hladna voda" },
-  { name: "Slavina - topla voda" },
-  { name: "Cev - silikonska 8mm" },
-  { name: "Grejač" },
-  { name: "Termostat" },
-];
 
 export default function ServiceTicketScreen() {
   const navigation = useNavigation();
@@ -51,11 +34,27 @@ export default function ServiceTicketScreen() {
     (s) => s.removeSparePartFromCurrentTicket
   );
 
+  const operations = useConfigStore((s) => s.operations);
+  const spareParts = useConfigStore((s) => s.spareParts);
+  const fetchConfig = useConfigStore((s) => s.fetchConfig);
+  const isLoadingConfig = useConfigStore((s) => s.isLoading);
+
   const [showOperationsModal, setShowOperationsModal] = useState(false);
   const [showSparePartsModal, setShowSparePartsModal] = useState(false);
   const [sparePartQuantity, setSparePartQuantity] = useState<{
     [key: string]: number;
   }>({});
+
+  // Fetch config on mount if empty
+  useEffect(() => {
+    if (operations.length === 0 || spareParts.length === 0) {
+      fetchConfig();
+    }
+  }, []);
+
+  // Filter only active items for display
+  const availableOperations = operations.filter((op) => op.isActive);
+  const availableSpareParts = spareParts.filter((sp) => sp.isActive);
 
   if (!currentTicket) {
     return (
@@ -288,23 +287,41 @@ export default function ServiceTicketScreen() {
           </View>
           <ScrollView className="flex-1">
             <View className="p-6 gap-2">
-              {AVAILABLE_OPERATIONS.map((op, index) => (
-                <Pressable
-                  key={index}
-                  onPress={() => {
-                    handleAddOperation(op);
-                    setShowOperationsModal(false);
-                  }}
-                  className="bg-gray-50 rounded-xl p-4 active:bg-gray-100"
-                >
-                  <Text className="text-gray-900 text-base font-semibold mb-1">
-                    {op.name}
+              {isLoadingConfig ? (
+                <View className="py-12 items-center">
+                  <ActivityIndicator size="large" color="#3B82F6" />
+                  <Text className="text-gray-500 text-sm mt-3">
+                    Učitavam operacije...
                   </Text>
-                  <Text className="text-gray-600 text-sm">
-                    {op.description}
+                </View>
+              ) : availableOperations.length === 0 ? (
+                <View className="py-12 items-center">
+                  <Ionicons name="alert-circle" size={48} color="#9CA3AF" />
+                  <Text className="text-gray-500 text-sm mt-3">
+                    Nema dostupnih operacija
                   </Text>
-                </Pressable>
-              ))}
+                </View>
+              ) : (
+                availableOperations.map((op) => (
+                  <Pressable
+                    key={op.id}
+                    onPress={() => {
+                      handleAddOperation(op);
+                      setShowOperationsModal(false);
+                    }}
+                    className="bg-gray-50 rounded-xl p-4 active:bg-gray-100"
+                  >
+                    <Text className="text-gray-900 text-base font-semibold mb-1">
+                      {op.name}
+                    </Text>
+                    {op.description && (
+                      <Text className="text-gray-600 text-sm">
+                        {op.description}
+                      </Text>
+                    )}
+                  </Pressable>
+                ))
+              )}
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -331,50 +348,66 @@ export default function ServiceTicketScreen() {
           </View>
           <ScrollView className="flex-1">
             <View className="p-6 gap-3">
-              {AVAILABLE_SPARE_PARTS.map((part, index) => (
-                <View
-                  key={index}
-                  className="bg-gray-50 rounded-xl p-4"
-                >
-                  <View className="flex-row items-center justify-between mb-3">
-                    <Text className="flex-1 text-gray-900 text-base font-semibold">
-                      {part.name}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-3">
-                    <View className="flex-1 flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
-                      <Text className="text-gray-500 text-sm mr-2">
-                        Količina:
-                      </Text>
-                      <TextInput
-                        className="flex-1 text-gray-900 text-base"
-                        keyboardType="number-pad"
-                        value={(
-                          sparePartQuantity[part.name] || 1
-                        ).toString()}
-                        onChangeText={(text) => {
-                          const qty = parseInt(text) || 1;
-                          setSparePartQuantity({
-                            ...sparePartQuantity,
-                            [part.name]: qty,
-                          });
-                        }}
-                      />
-                    </View>
-                    <Pressable
-                      onPress={() => {
-                        handleAddSparePart(part);
-                        setShowSparePartsModal(false);
-                      }}
-                      className="bg-emerald-600 px-6 py-3 rounded-lg active:opacity-80"
-                    >
-                      <Text className="text-white text-sm font-semibold">
-                        Dodaj
-                      </Text>
-                    </Pressable>
-                  </View>
+              {isLoadingConfig ? (
+                <View className="py-12 items-center">
+                  <ActivityIndicator size="large" color="#10B981" />
+                  <Text className="text-gray-500 text-sm mt-3">
+                    Učitavam delove...
+                  </Text>
                 </View>
-              ))}
+              ) : availableSpareParts.length === 0 ? (
+                <View className="py-12 items-center">
+                  <Ionicons name="alert-circle" size={48} color="#9CA3AF" />
+                  <Text className="text-gray-500 text-sm mt-3">
+                    Nema dostupnih delova
+                  </Text>
+                </View>
+              ) : (
+                availableSpareParts.map((part) => (
+                  <View
+                    key={part.id}
+                    className="bg-gray-50 rounded-xl p-4"
+                  >
+                    <View className="flex-row items-center justify-between mb-3">
+                      <Text className="flex-1 text-gray-900 text-base font-semibold">
+                        {part.name}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-1 flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
+                        <Text className="text-gray-500 text-sm mr-2">
+                          Količina:
+                        </Text>
+                        <TextInput
+                          className="flex-1 text-gray-900 text-base"
+                          keyboardType="number-pad"
+                          value={(
+                            sparePartQuantity[part.name] || 1
+                          ).toString()}
+                          onChangeText={(text) => {
+                            const qty = parseInt(text) || 1;
+                            setSparePartQuantity({
+                              ...sparePartQuantity,
+                              [part.name]: qty,
+                            });
+                          }}
+                        />
+                      </View>
+                      <Pressable
+                        onPress={() => {
+                          handleAddSparePart(part);
+                          setShowSparePartsModal(false);
+                        }}
+                        className="bg-emerald-600 px-6 py-3 rounded-lg active:opacity-80"
+                      >
+                        <Text className="text-white text-sm font-semibold">
+                          Dodaj
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))
+              )}
             </View>
           </ScrollView>
         </SafeAreaView>

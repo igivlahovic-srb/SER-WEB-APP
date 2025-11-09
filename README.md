@@ -54,19 +54,14 @@ La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisni
 - **Vizuelni indikatori**: Okvir za precizno pozicioniranje koda
 
 ### 🔧 Servisni nalog
-- **Dodavanje operacija**: Izbor iz liste predefinisanih servisnih operacija
-  - Čišćenje rezervoara
-  - Zamena filtera
-  - Provera slavina
-  - Provera sistema hlađenja
-  - Provera grejača
-  - Zamena cevi
+- **Dodavanje operacija**: Izbor iz liste operacija koje se preuzimaju sa web panela
+  - Operacije se konfigurišu na web admin panelu
+  - Automatska sinhronizacija sa mobilnom aplikacijom
+  - Prikazuju se samo aktivne operacije
 - **Rezervni delovi**: Evidencija utrošenih delova sa količinom
-  - Filter uložak
-  - Slavine (hladna/topla voda)
-  - Silikonske cevi
-  - Grejači
-  - Termostati
+  - Rezervni delovi se konfigurišu na web admin panelu
+  - Automatsko preuzimanje sa servera
+  - Prikazuju se samo aktivni delovi
 - **Validacija**: Ne dozvoljava završetak bez bar jedne operacije
 - **Interaktivno brisanje**: Mogućnost uklanjanja grešaka
 
@@ -138,7 +133,9 @@ src/
 │   └── RootNavigator.tsx
 ├── state/            # Zustand state management
 │   ├── authStore.ts
-│   └── serviceStore.ts
+│   ├── serviceStore.ts
+│   ├── syncStore.ts
+│   └── configStore.ts
 ├── types/            # TypeScript types
 │   └── index.ts
 └── utils/            # Helper functions
@@ -256,6 +253,10 @@ Web panel će biti dostupan na: `http://localhost:3000`
 - **👥 Korisnici**: Pregled svih korisnika, filtriranje po statusu
 - **🔧 Servisi**: Kompletna istorija svih servisa sa detaljima
 - **🔍 Detalji servisa**: Klik na servis pokazuje sve operacije i rezervne delove
+- **⚙️ Konfiguracija**:
+  - Upravljanje operacijama (dodavanje, izmena, deaktivacija)
+  - Upravljanje rezervnim delovima (dodavanje, izmena, deaktivacija)
+  - Sinhronizacija sa mobilnom aplikacijom (Web → Mobile only)
 
 Više informacija u `web-admin/README.md`
 
@@ -268,6 +269,8 @@ Više informacija u `web-admin/README.md`
 - Korisnik ne može da obriše ili deaktivira sam sebe
 - QR kodovi moraju biti validan format (bilo koji QR/EAN kod se može skenirati za demo)
 - Aplikacija je optimizovana za iOS
+- **Operacije i rezervni delovi se konfigurišu na web admin panelu** i automatski preuzimaju u mobilnu aplikaciju
+- Sinhronizacija konfiguracije ide samo u jednom pravcu: **Web Panel → Mobilna aplikacija**
 
 ## 🔄 Buduća poboljšanja
 

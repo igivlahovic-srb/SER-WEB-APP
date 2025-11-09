@@ -34,3 +34,20 @@ export interface ServiceTicket {
   spareParts: SparePart[];
   notes?: string;
 }
+
+// Configuration items (master data from web admin)
+export interface OperationTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date | string;
+}
+
+export interface SparePartTemplate {
+  id: string;
+  name: string;
+  unit: string;
+  isActive: boolean;
+  createdAt: Date | string;
+}
