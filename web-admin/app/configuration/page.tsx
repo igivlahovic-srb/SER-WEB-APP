@@ -358,28 +358,8 @@ export default function ConfigurationPage() {
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        {/* Back to Dashboard Button */}
-        <div className="mb-6 flex items-center justify-between">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-colors border border-gray-200 shadow-sm"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Vrati se na Dashboard
-          </button>
-
+        {/* Sync Button */}
+        <div className="mb-6 flex items-center justify-end">
           <button
             onClick={async () => {
               if (confirm("Da li želite da pošaljete konfiguraciju na sve mobilne uređaje?")) {
