@@ -27,12 +27,6 @@ export default function DashboardScreen() {
     return ticketDate.toDateString() === today.toDateString();
   });
 
-  // Calculate total operations and spare parts used
-  const totalOperations = tickets.reduce((sum, ticket) => sum + ticket.operations.length, 0);
-  const totalSpareParts = tickets.reduce((sum, ticket) => {
-    return sum + ticket.spareParts.reduce((partSum, part) => partSum + part.quantity, 0);
-  }, 0);
-
   const isSuperUser = user?.role === "super_user";
 
   const handleStartService = () => {
@@ -94,52 +88,11 @@ export default function DashboardScreen() {
 
         {/* Stats Cards */}
         <View className="px-6 -mt-4 mb-6">
-          <View className="flex-row gap-3 mb-3">
-            <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
-              <View className="flex-row items-center justify-between mb-2">
-                <Ionicons name="checkmark-done" size={20} color="#10B981" />
-                <Text className="text-emerald-600 text-xs font-semibold bg-emerald-50 px-2 py-1 rounded-lg">
-                  SERVISI
-                </Text>
-              </View>
-              <Text className="text-gray-900 text-2xl font-bold mb-1">
-                {tickets.length}
-              </Text>
-              <Text className="text-gray-500 text-xs">Ukupno urađeno</Text>
-            </View>
-
-            <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
-              <View className="flex-row items-center justify-between mb-2">
-                <Ionicons name="construct" size={20} color="#3B82F6" />
-                <Text className="text-blue-600 text-xs font-semibold bg-blue-50 px-2 py-1 rounded-lg">
-                  OPERACIJE
-                </Text>
-              </View>
-              <Text className="text-gray-900 text-2xl font-bold mb-1">
-                {totalOperations}
-              </Text>
-              <Text className="text-gray-500 text-xs">Ukupno izvršeno</Text>
-            </View>
-          </View>
-
           <View className="flex-row gap-3">
             <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
               <View className="flex-row items-center justify-between mb-2">
-                <Ionicons name="hardware-chip" size={20} color="#F59E0B" />
+                <Ionicons name="time-outline" size={20} color="#F59E0B" />
                 <Text className="text-amber-600 text-xs font-semibold bg-amber-50 px-2 py-1 rounded-lg">
-                  DELOVI
-                </Text>
-              </View>
-              <Text className="text-gray-900 text-2xl font-bold mb-1">
-                {totalSpareParts}
-              </Text>
-              <Text className="text-gray-500 text-xs">Ukupno utrošeno</Text>
-            </View>
-
-            <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
-              <View className="flex-row items-center justify-between mb-2">
-                <Ionicons name="time-outline" size={20} color="#8B5CF6" />
-                <Text className="text-purple-600 text-xs font-semibold bg-purple-50 px-2 py-1 rounded-lg">
                   AKTIVNO
                 </Text>
               </View>
@@ -147,6 +100,32 @@ export default function DashboardScreen() {
                 {activeTickets.length}
               </Text>
               <Text className="text-gray-500 text-xs">U toku</Text>
+            </View>
+
+            <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
+              <View className="flex-row items-center justify-between mb-2">
+                <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                <Text className="text-emerald-600 text-xs font-semibold bg-emerald-50 px-2 py-1 rounded-lg">
+                  DANAS
+                </Text>
+              </View>
+              <Text className="text-gray-900 text-2xl font-bold mb-1">
+                {todayTickets.length}
+              </Text>
+              <Text className="text-gray-500 text-xs">Servisa</Text>
+            </View>
+
+            <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm">
+              <View className="flex-row items-center justify-between mb-2">
+                <Ionicons name="stats-chart" size={20} color="#3B82F6" />
+                <Text className="text-blue-600 text-xs font-semibold bg-blue-50 px-2 py-1 rounded-lg">
+                  UKUPNO
+                </Text>
+              </View>
+              <Text className="text-gray-900 text-2xl font-bold mb-1">
+                {completedTickets.length}
+              </Text>
+              <Text className="text-gray-500 text-xs">Završeno</Text>
             </View>
           </View>
         </View>
