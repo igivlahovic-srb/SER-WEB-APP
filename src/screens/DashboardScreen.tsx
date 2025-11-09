@@ -44,25 +44,23 @@ export default function DashboardScreen() {
           colors={["#1E40AF", "#3B82F6"]}
           style={{ paddingTop: 60, paddingBottom: 32, paddingHorizontal: 24 }}
         >
-          <View className="flex-row items-center justify-between mb-6">
-            <View>
-              <Text className="text-blue-100 text-sm font-medium mb-1">
-                Dobrodošli nazad
-              </Text>
-              <Text className="text-white text-2xl font-bold">
-                {user?.name}
-              </Text>
-              <Text className="text-blue-200 text-sm mt-1">
-                {isSuperUser ? "Super Administrator" : "Serviser"}
-              </Text>
-            </View>
-            <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center">
+          <View className="items-center mb-6">
+            <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center mb-4">
               <Ionicons
                 name={isSuperUser ? "shield-checkmark" : "person"}
                 size={32}
                 color="#FFFFFF"
               />
             </View>
+            <Text className="text-blue-100 text-sm font-medium mb-1">
+              Dobrodošli nazad
+            </Text>
+            <Text className="text-white text-2xl font-bold">
+              {user?.name}
+            </Text>
+            <Text className="text-blue-200 text-sm mt-1">
+              {isSuperUser ? "Super Administrator" : "Serviser"}
+            </Text>
           </View>
 
           {/* Quick Action Button */}
