@@ -98,6 +98,14 @@ export default function HistoryScreen() {
                 </>
               )}
             </View>
+            {ticket.endTime && ticket.durationMinutes && (
+              <View className="flex-row items-center gap-1 mt-1">
+                <Ionicons name="time-outline" size={14} color="#3B82F6" />
+                <Text className="text-blue-600 text-xs font-semibold">
+                  {ticket.durationMinutes} min
+                </Text>
+              </View>
+            )}
           </View>
           <View className="flex-row items-center gap-2">
             <View

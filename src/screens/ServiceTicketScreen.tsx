@@ -209,6 +209,58 @@ export default function ServiceTicketScreen() {
           </View>
         </View>
 
+        {/* Time Information Card */}
+        <View className="bg-gradient-to-r from-blue-50 to-indigo-50 mx-6 mt-4 rounded-2xl p-4 border border-blue-100">
+          <View className="flex-row items-center gap-3 mb-3">
+            <Ionicons name="time-outline" size={20} color="#3B82F6" />
+            <Text className="text-gray-900 text-base font-bold">
+              Podaci o servisu
+            </Text>
+          </View>
+          <View className="gap-2">
+            <View className="flex-row justify-between">
+              <Text className="text-gray-600 text-sm">Početak:</Text>
+              <Text className="text-gray-900 text-sm font-semibold">
+                {new Date(currentTicket.startTime).toLocaleString("sr-RS", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </View>
+            {currentTicket.endTime && (
+              <>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600 text-sm">Završetak:</Text>
+                  <Text className="text-gray-900 text-sm font-semibold">
+                    {new Date(currentTicket.endTime).toLocaleString("sr-RS", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </View>
+                <View className="h-px bg-blue-200 my-1" />
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-600 text-sm font-medium">Trajanje:</Text>
+                  <Text className="text-blue-600 text-base font-bold">
+                    {(() => {
+                      const duration = currentTicket.durationMinutes ||
+                        Math.round((new Date(currentTicket.endTime).getTime() -
+                          new Date(currentTicket.startTime).getTime()) / 60000);
+                      return `${duration} min`;
+                    })()}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+
         {/* Operations Section */}
         <View className="px-6 py-4">
           <View className="flex-row items-center justify-between mb-3">

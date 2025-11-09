@@ -31,23 +31,56 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
           : state.currentTicket,
     })),
   completeTicket: (id) =>
-    set((state) => ({
-      tickets: state.tickets.map((t) =>
-        t.id === id ? { ...t, status: "completed", endTime: new Date() } : t
-      ),
-      currentTicket:
-        state.currentTicket?.id === id
-          ? { ...state.currentTicket, status: "completed", endTime: new Date() }
-          : state.currentTicket,
-    })),
+    set((state) => {
+      const endTime = new Date();
+      return {
+        tickets: state.tickets.map((t) => {
+          if (t.id === id) {
+            const durationMinutes = Math.round(
+              (endTime.getTime() - new Date(t.startTime).getTime()) / 60000
+            );
+            return {
+              ...t,
+              status: "completed",
+              endTime,
+              durationMinutes,
+            };
+          }
+          return t;
+        }),
+        currentTicket:
+          state.currentTicket?.id === id
+            ? (() => {
+                const durationMinutes = Math.round(
+                  (endTime.getTime() -
+                    new Date(state.currentTicket.startTime).getTime()) /
+                    60000
+                );
+                return {
+                  ...state.currentTicket,
+                  status: "completed",
+                  endTime,
+                  durationMinutes,
+                };
+              })()
+            : state.currentTicket,
+      };
+    }),
   reopenTicket: (id) =>
     set((state) => ({
       tickets: state.tickets.map((t) =>
-        t.id === id ? { ...t, status: "in_progress", endTime: undefined } : t
+        t.id === id
+          ? { ...t, status: "in_progress", endTime: undefined, durationMinutes: undefined }
+          : t
       ),
       currentTicket:
         state.currentTicket?.id === id
-          ? { ...state.currentTicket, status: "in_progress", endTime: undefined }
+          ? {
+              ...state.currentTicket,
+              status: "in_progress",
+              endTime: undefined,
+              durationMinutes: undefined,
+            }
           : state.currentTicket,
     })),
   setCurrentTicket: (ticket) => set({ currentTicket: ticket }),

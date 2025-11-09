@@ -256,7 +256,13 @@ export default function ServicesPage() {
                       Serviser
                     </th>
                     <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
-                      Datum početka
+                      Početak
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Završetak
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Trajanje
                     </th>
                     <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
                       Status
@@ -270,44 +276,62 @@ export default function ServicesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTickets.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-4 px-6 font-medium text-gray-900">
-                        {ticket.deviceCode}
-                      </td>
-                      <td className="py-4 px-6 text-gray-700">
-                        {ticket.technicianName}
-                      </td>
-                      <td className="py-4 px-6 text-gray-600 text-sm">
-                        {format(new Date(ticket.startTime), "dd.MM.yyyy HH:mm")}
-                      </td>
-                      <td className="py-4 px-6">
-                        {ticket.status === "completed" ? (
-                          <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                            Završeno
-                          </span>
-                        ) : (
-                          <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
-                            U toku
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-gray-600 text-sm">
-                        {ticket.operations.length}
-                      </td>
-                      <td className="py-4 px-6">
-                        <button
-                          onClick={() => setSelectedTicket(ticket)}
-                          className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                        >
-                          Detalji
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredTickets.map((ticket) => {
+                    // Calculate duration in minutes
+                    let durationMinutes = ticket.durationMinutes;
+                    if (!durationMinutes && ticket.endTime) {
+                      const start = new Date(ticket.startTime);
+                      const end = new Date(ticket.endTime);
+                      durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
+                    }
+
+                    return (
+                      <tr
+                        key={ticket.id}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td className="py-4 px-6 font-medium text-gray-900">
+                          {ticket.deviceCode}
+                        </td>
+                        <td className="py-4 px-6 text-gray-700">
+                          {ticket.technicianName}
+                        </td>
+                        <td className="py-4 px-6 text-gray-600 text-sm">
+                          {format(new Date(ticket.startTime), "dd.MM.yyyy HH:mm")}
+                        </td>
+                        <td className="py-4 px-6 text-gray-600 text-sm">
+                          {ticket.endTime
+                            ? format(new Date(ticket.endTime), "dd.MM.yyyy HH:mm")
+                            : "-"}
+                        </td>
+                        <td className="py-4 px-6 text-gray-600 text-sm font-medium">
+                          {durationMinutes ? `${durationMinutes} min` : "-"}
+                        </td>
+                        <td className="py-4 px-6">
+                          {ticket.status === "completed" ? (
+                            <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                              Završeno
+                            </span>
+                          ) : (
+                            <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+                              U toku
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-gray-600 text-sm">
+                          {ticket.operations.length}
+                        </td>
+                        <td className="py-4 px-6">
+                          <button
+                            onClick={() => setSelectedTicket(ticket)}
+                            className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          >
+                            Detalji
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -374,7 +398,7 @@ export default function ServicesPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Datum početka</p>
+                    <p className="text-sm text-gray-600 mb-1">Vreme početka</p>
                     <p className="font-medium text-gray-900">
                       {format(
                         new Date(selectedTicket.startTime),
@@ -383,15 +407,28 @@ export default function ServicesPage() {
                     </p>
                   </div>
                   {selectedTicket.endTime && (
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Datum završetka</p>
-                      <p className="font-medium text-gray-900">
-                        {format(
-                          new Date(selectedTicket.endTime),
-                          "dd.MM.yyyy HH:mm"
-                        )}
-                      </p>
-                    </div>
+                    <>
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Vreme završetka</p>
+                        <p className="font-medium text-gray-900">
+                          {format(
+                            new Date(selectedTicket.endTime),
+                            "dd.MM.yyyy HH:mm"
+                          )}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Trajanje</p>
+                        <p className="font-bold text-blue-600">
+                          {(() => {
+                            const duration = selectedTicket.durationMinutes ||
+                              Math.round((new Date(selectedTicket.endTime).getTime() -
+                                new Date(selectedTicket.startTime).getTime()) / 60000);
+                            return `${duration} minuta`;
+                          })()}
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

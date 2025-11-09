@@ -32,6 +32,7 @@ export interface ServiceTicket {
   technicianName: string;
   startTime: Date | string;
   endTime?: Date | string;
+  durationMinutes?: number; // Trajanje servisa u minutima
   status: "in_progress" | "completed";
   operations: Operation[];
   spareParts: SparePart[];
