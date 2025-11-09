@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { OperationTemplate, SparePartTemplate } from "../../types";
 import Navigation from "../../components/Navigation";
 
 export default function ConfigurationPage() {
-  const router = useRouter();
   const [operations, setOperations] = useState<OperationTemplate[]>([]);
   const [spareParts, setSpareParts] = useState<SparePartTemplate[]>([]);
   const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "database" | "deviceTypes">("operations");
@@ -371,7 +369,7 @@ export default function ConfigurationPage() {
                   } else {
                     alert("Greška: " + data.message);
                   }
-                } catch (error) {
+                } catch {
                   alert("Greška prilikom slanja konfiguracije");
                 }
               }
@@ -900,7 +898,7 @@ function DatabaseConnectionTab() {
         setIsConnected(false);
         setTestResult(`Greška: ${data.message}`);
       }
-    } catch (error) {
+    } catch {
       setIsConnected(false);
       setTestResult("Greška pri povezivanju sa bazom");
     } finally {

@@ -70,10 +70,6 @@ export default function ServicesPage() {
   const activeCount = tickets.filter((t) => t.status === "in_progress").length;
   const completedCount = tickets.filter((t) => t.status === "completed").length;
   const totalOperations = tickets.reduce((sum, t) => sum + t.operations.length, 0);
-  const totalParts = tickets.reduce(
-    (sum, t) => sum + t.spareParts.reduce((s, p) => s + p.quantity, 0),
-    0
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">

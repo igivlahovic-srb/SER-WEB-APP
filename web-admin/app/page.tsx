@@ -33,7 +33,7 @@ export default function LoginPage() {
       } else {
         setError(data.message || "Pogrešni kredencijali ili nemate admin pristup");
       }
-    } catch (err) {
+    } catch {
       setError("Greška pri povezivanju. Proverite da li je mobilna aplikacija sinhronizovala korisnike.");
     } finally {
       setLoading(false);

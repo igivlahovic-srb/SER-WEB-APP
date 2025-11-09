@@ -72,7 +72,6 @@ export default function DashboardPage() {
   const activeTickets = tickets.filter((t) => t.status === "in_progress");
   const completedTickets = tickets.filter((t) => t.status === "completed");
   const activeUsers = users.filter((u) => u.isActive);
-  const technicianUsers = users.filter((u) => u.role === "technician");
 
   const todayTickets = tickets.filter((t) => {
     const ticketDate = new Date(t.startTime);
