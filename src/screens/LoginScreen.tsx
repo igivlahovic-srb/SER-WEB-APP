@@ -62,9 +62,12 @@ export default function LoginScreen() {
                   <Ionicons name="water" size={40} color="#1E40AF" />
                 </View>
                 <Text className="text-white text-3xl font-bold mb-2">
-                  Water Service
+                  La Fantana WHS
                 </Text>
-                <Text className="text-blue-100 text-base text-center">
+                <Text className="text-blue-100 text-base text-center font-medium">
+                  Servisni Modul
+                </Text>
+                <Text className="text-blue-200 text-sm text-center mt-2">
                   Sistem za održavanje water aparata
                 </Text>
               </View>

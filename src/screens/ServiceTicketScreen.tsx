@@ -128,6 +128,16 @@ export default function ServiceTicketScreen() {
       <ConnectionIndicator />
 
       <ScrollView className="flex-1">
+        {/* App Header */}
+        <LinearGradient
+          colors={["#1E40AF", "#3B82F6"]}
+          style={{ paddingTop: 50, paddingBottom: 16, paddingHorizontal: 24 }}
+        >
+          <Text className="text-white text-lg font-bold">
+            La Fantana WHS - Servisni Modul
+          </Text>
+        </LinearGradient>
+
         {/* Device Info Card */}
         <View className="bg-white px-6 py-4 border-b border-gray-200">
           <View className="flex-row items-center gap-3">
