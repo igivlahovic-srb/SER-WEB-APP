@@ -1416,10 +1416,19 @@ function UbuntuSystemTab() {
   const fetchSystemInfo = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/system/info");
+      const response = await fetch("/api/system/info", {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
       const data = await response.json();
+      console.log("System info received:", data);
       if (data.success) {
         setSystemInfo(data.data);
+        console.log("System info set:", data.data);
+      } else {
+        console.error("API returned error:", data);
       }
     } catch (error) {
       console.error("Error fetching system info:", error);
@@ -1475,6 +1484,18 @@ function UbuntuSystemTab() {
 
   return (
     <div className="space-y-6">
+      {/* Debug Info */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <p className="text-xs font-mono text-yellow-900">
+          Debug: systemInfo loaded = {systemInfo ? 'YES' : 'NO'}
+        </p>
+        {systemInfo && (
+          <pre className="text-xs mt-2 overflow-auto max-h-40">
+            {JSON.stringify(systemInfo, null, 2)}
+          </pre>
+        )}
+      </div>
+
       {/* System Information */}
       <div className="bg-white shadow-md rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
