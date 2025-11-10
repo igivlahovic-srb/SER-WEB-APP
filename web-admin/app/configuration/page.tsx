@@ -1459,18 +1459,41 @@ function UbuntuSystemTab() {
     );
   }
 
+  if (!systemInfo) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 mb-4">Greška pri učitavanju informacija o sistemu</p>
+        <button
+          onClick={fetchSystemInfo}
+          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          Pokušaj ponovo
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* System Information */}
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Informacije o Sistemu</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900">Informacije o Sistemu</h3>
+          <button
+            onClick={fetchSystemInfo}
+            disabled={isLoading}
+            className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+          >
+            Osveži
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* OS Version */}
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Trenutna Verzija Sistema</p>
             <p className="text-lg font-semibold text-gray-900">
-              {systemInfo?.osVersion || "Ubuntu 22.04 LTS"}
+              {systemInfo.osVersion}
             </p>
           </div>
 
@@ -1478,7 +1501,7 @@ function UbuntuSystemTab() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Kernel Verzija</p>
             <p className="text-lg font-semibold text-gray-900">
-              {systemInfo?.kernelVersion || "Loading..."}
+              {systemInfo.kernelVersion}
             </p>
           </div>
 
@@ -1486,18 +1509,18 @@ function UbuntuSystemTab() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Prostor na Disku</p>
             <p className="text-lg font-semibold text-gray-900">
-              {systemInfo?.diskSpace?.used || "0"} / {systemInfo?.diskSpace?.total || "0"}
+              {systemInfo.diskSpace.used} / {systemInfo.diskSpace.total}
             </p>
             <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${
-                  (systemInfo?.diskSpace?.percentage || 0) > 80 ? "bg-red-500" : "bg-green-500"
+                  systemInfo.diskSpace.percentage > 80 ? "bg-red-500" : "bg-green-500"
                 }`}
-                style={{ width: `${systemInfo?.diskSpace?.percentage || 0}%` }}
+                style={{ width: `${systemInfo.diskSpace.percentage}%` }}
               ></div>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {systemInfo?.diskSpace?.percentage || 0}% iskorišćeno
+              {systemInfo.diskSpace.percentage}% iskorišćeno
             </p>
           </div>
 
@@ -1505,18 +1528,18 @@ function UbuntuSystemTab() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">RAM Memorija</p>
             <p className="text-lg font-semibold text-gray-900">
-              {systemInfo?.ramMemory?.used || "0"} / {systemInfo?.ramMemory?.total || "0"}
+              {systemInfo.ramMemory.used} / {systemInfo.ramMemory.total}
             </p>
             <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${
-                  (systemInfo?.ramMemory?.percentage || 0) > 80 ? "bg-red-500" : "bg-blue-500"
+                  systemInfo.ramMemory.percentage > 80 ? "bg-red-500" : "bg-blue-500"
                 }`}
-                style={{ width: `${systemInfo?.ramMemory?.percentage || 0}%` }}
+                style={{ width: `${systemInfo.ramMemory.percentage}%` }}
               ></div>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {systemInfo?.ramMemory?.percentage || 0}% iskorišćeno • {systemInfo?.ramMemory?.available || "0"} dostupno
+              {systemInfo.ramMemory.percentage}% iskorišćeno • {systemInfo.ramMemory.available} dostupno
             </p>
           </div>
 
@@ -1524,9 +1547,9 @@ function UbuntuSystemTab() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Status Ažuriranja</p>
             <p className={`text-lg font-semibold ${
-              systemInfo?.updateAvailable ? "text-orange-600" : "text-green-600"
+              systemInfo.updateAvailable ? "text-orange-600" : "text-green-600"
             }`}>
-              {systemInfo?.updateAvailable ? "Ažuriranje dostupno" : "Sistem je ažuriran"}
+              {systemInfo.updateAvailable ? "Ažuriranje dostupno" : "Sistem je ažuriran"}
             </p>
           </div>
         </div>
@@ -1540,28 +1563,28 @@ function UbuntuSystemTab() {
           <div className="p-4 bg-indigo-50 rounded-lg">
             <p className="text-sm text-indigo-600 mb-1">Git Verzija</p>
             <p className="text-lg font-semibold text-gray-900 font-mono">
-              {systemInfo?.gitVersion || "Loading..."}
+              {systemInfo.gitVersion}
             </p>
           </div>
 
           <div className="p-4 bg-indigo-50 rounded-lg">
             <p className="text-sm text-indigo-600 mb-1">Branch</p>
             <p className="text-lg font-semibold text-gray-900 font-mono">
-              {systemInfo?.gitBranch || "main"}
+              {systemInfo.gitBranch}
             </p>
           </div>
 
           <div className="p-4 bg-indigo-50 rounded-lg">
             <p className="text-sm text-indigo-600 mb-1">Poslednja Izmena</p>
             <p className="text-sm text-gray-900">
-              {systemInfo?.lastCommitDate || "Loading..."}
+              {systemInfo.lastCommitDate}
             </p>
           </div>
 
           <div className="p-4 bg-indigo-50 rounded-lg">
             <p className="text-sm text-indigo-600 mb-1">Commit Message</p>
-            <p className="text-sm text-gray-900 truncate">
-              {systemInfo?.lastCommitMessage || "Loading..."}
+            <p className="text-sm text-gray-900 truncate" title={systemInfo.lastCommitMessage}>
+              {systemInfo.lastCommitMessage}
             </p>
           </div>
         </div>
