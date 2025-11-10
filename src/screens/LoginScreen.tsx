@@ -14,7 +14,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
-import { useConfigStore } from "../state/configStore";
 import * as Application from "expo-application";
 
 export default function LoginScreen() {
@@ -25,7 +24,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const login = useAuthStore((s) => s.login);
-  const fetchSparePartsFromSQL = useConfigStore((s) => s.fetchSparePartsFromSQL);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -39,17 +37,7 @@ export default function LoginScreen() {
 
     const success = await login(username.trim(), password);
 
-    if (success) {
-      // After successful login, fetch spare parts from SQL database
-      console.log("[LoginScreen] Login successful, fetching spare parts from SQL...");
-      try {
-        await fetchSparePartsFromSQL();
-        console.log("[LoginScreen] Spare parts fetched successfully");
-      } catch (error) {
-        console.error("[LoginScreen] Failed to fetch spare parts:", error);
-        // Don't block login if spare parts fetch fails
-      }
-    } else {
+    if (!success) {
       setError("Neispravno korisničko ime ili lozinka");
     }
 

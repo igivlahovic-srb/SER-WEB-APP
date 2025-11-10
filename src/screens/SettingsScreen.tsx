@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSyncStore } from "../state/syncStore";
 import { useAuthStore } from "../state/authStore";
 import { useServiceStore } from "../state/serviceStore";
+import { useConfigStore } from "../state/configStore";
 import { format } from "date-fns";
 
 export default function SettingsScreen() {
@@ -30,8 +31,12 @@ export default function SettingsScreen() {
   const syncUsersToWeb = useAuthStore((s) => s.syncToWeb);
   const syncTicketsToWeb = useServiceStore((s) => s.syncToWeb);
 
+  const fetchConfig = useConfigStore((s) => s.fetchConfig);
+  const lastConfigSync = useConfigStore((s) => s.lastConfigSync);
+
   const [urlInput, setUrlInput] = useState(apiUrl);
   const [testing, setTesting] = useState(false);
+  const [refreshingConfig, setRefreshingConfig] = useState(false);
 
   const handleSaveUrl = () => {
     if (!urlInput.trim()) {
@@ -127,6 +132,45 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleRefreshSpareParts = async () => {
+    if (refreshingConfig) return;
+
+    setRefreshingConfig(true);
+
+    try {
+      // Test connection first
+      const connectionOk = await testConnection();
+      if (!connectionOk) {
+        Alert.alert(
+          "Greška konekcije",
+          "Ne mogu da se povežem sa web panelom. Proverite podešavanja."
+        );
+        setRefreshingConfig(false);
+        return;
+      }
+
+      // Fetch config (operations and spare parts) from web admin
+      const success = await fetchConfig();
+
+      if (success) {
+        Alert.alert(
+          "Uspeh",
+          "Rezervni delovi su uspešno ažurirani sa web panela! ✅"
+        );
+      } else {
+        Alert.alert(
+          "Greška",
+          "Nije moguće učitati rezervne delove sa web panela"
+        );
+      }
+    } catch (error) {
+      Alert.alert("Greška", "Došlo je do greške pri ažuriranju rezervnih delova");
+      console.error(error);
+    } finally {
+      setRefreshingConfig(false);
+    }
+  };
+
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
@@ -198,6 +242,55 @@ export default function SettingsScreen() {
                 thumbColor={autoSync ? "#3B82F6" : "#F3F4F6"}
               />
             </View>
+          </View>
+
+          {/* Spare Parts Refresh */}
+          <View className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-gray-900 text-xl font-bold">
+                Rezervni delovi
+              </Text>
+              <Ionicons name="build-outline" size={32} color="#10B981" />
+            </View>
+
+            {lastConfigSync && (
+              <View className="bg-emerald-50 rounded-xl p-3 mb-4">
+                <Text className="text-emerald-900 text-sm font-medium">
+                  Poslednje ažuriranje:
+                </Text>
+                <Text className="text-emerald-700 text-xs mt-1">
+                  {format(new Date(lastConfigSync), "dd.MM.yyyy HH:mm:ss")}
+                </Text>
+              </View>
+            )}
+
+            <Text className="text-gray-600 text-sm mb-4">
+              Ažurirajte listu rezervnih delova i operacija sa web admin panela
+            </Text>
+
+            <Pressable
+              onPress={handleRefreshSpareParts}
+              disabled={refreshingConfig || testing || isSyncing}
+              className={`rounded-2xl px-6 py-4 flex-row items-center justify-center ${
+                refreshingConfig || testing || isSyncing ? "bg-gray-300" : "bg-emerald-600"
+              }`}
+            >
+              {refreshingConfig ? (
+                <>
+                  <ActivityIndicator color="#FFFFFF" className="mr-2" />
+                  <Text className="text-white text-base font-bold">
+                    Ažuriranje u toku...
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="refresh" size={20} color="#FFFFFF" />
+                  <Text className="text-white text-base font-bold ml-2">
+                    Osveži rezervne delove
+                  </Text>
+                </>
+              )}
+            </Pressable>
           </View>
 
           {/* API Configuration */}

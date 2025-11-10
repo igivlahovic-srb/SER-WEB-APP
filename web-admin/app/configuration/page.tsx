@@ -25,6 +25,8 @@ export default function ConfigurationPage() {
     unit: "",
   });
 
+  const [isLoadingSQLData, setIsLoadingSQLData] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch configuration data
@@ -209,6 +211,79 @@ export default function ConfigurationPage() {
     } catch (error) {
       console.error("Error deleting:", error);
       alert("Greška pri brisanju");
+    }
+  };
+
+  // Load spare parts from SQL database
+  const handleLoadFromSQL = async () => {
+    if (activeTab !== "spareParts") return;
+
+    if (!confirm("Da li želite da učitate rezervne delove iz SQL baze? Ovo će dodati nove stavke u konfiguraciju.")) {
+      return;
+    }
+
+    setIsLoadingSQLData(true);
+
+    try {
+      // Fetch spare parts from SQL
+      const response = await fetch("/api/spare-parts");
+      const data = await response.json();
+
+      if (!data.success) {
+        alert(data.message || "Greška pri učitavanju iz SQL baze");
+        setIsLoadingSQLData(false);
+        return;
+      }
+
+      const sqlSpareParts = data.data.spareParts || [];
+
+      if (sqlSpareParts.length === 0) {
+        alert("Nije pronađen nijedan rezervni deo u SQL bazi");
+        setIsLoadingSQLData(false);
+        return;
+      }
+
+      // Check for duplicates and add new items
+      const existingCodes = spareParts.map((sp) => sp.code);
+      const existingIds = spareParts.map((sp) => sp.id);
+
+      const newItems = sqlSpareParts.filter(
+        (item: any) => !existingIds.includes(item.id) && !existingCodes.includes(item.code)
+      );
+
+      if (newItems.length === 0) {
+        alert(`Svi rezervni delovi iz SQL baze već postoje u konfiguraciji (${sqlSpareParts.length} pronađeno)`);
+        setIsLoadingSQLData(false);
+        return;
+      }
+
+      // Import new items
+      const importResponse = await fetch("/api/config/spare-parts/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: newItems.map((item: any) => ({
+            id: item.id,
+            code: item.code,
+            name: item.name,
+            unit: "kom",
+          })),
+        }),
+      });
+
+      const importResult = await importResponse.json();
+
+      if (importResult.success) {
+        alert(`Uspešno učitano ${newItems.length} novih rezervnih delova iz SQL baze!\n\nUkupno u SQL bazi: ${sqlSpareParts.length}\nDodato novih: ${newItems.length}\nVeć postojalo: ${sqlSpareParts.length - newItems.length}`);
+        fetchConfigData();
+      } else {
+        alert(importResult.message || "Greška pri import-u rezervnih delova");
+      }
+    } catch (error) {
+      console.error("Error loading from SQL:", error);
+      alert("Greška pri učitavanju rezervnih delova iz SQL baze. Proverite da li je baza podataka pravilno konfigurisana.");
+    } finally {
+      setIsLoadingSQLData(false);
     }
   };
 
@@ -455,6 +530,25 @@ export default function ConfigurationPage() {
               <span>📊</span>
               Import iz CSV/Excel
             </button>
+            {activeTab === "spareParts" && (
+              <button
+                onClick={handleLoadFromSQL}
+                disabled={isLoadingSQLData}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingSQLData ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Učitavanje...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>💾</span>
+                    Učitaj iz SQL Baze
+                  </>
+                )}
+              </button>
+            )}
             <button
               onClick={fetchConfigData}
               className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
