@@ -7,7 +7,8 @@ import Navigation from "../../components/Navigation";
 export default function ConfigurationPage() {
   const [operations, setOperations] = useState<OperationTemplate[]>([]);
   const [spareParts, setSpareParts] = useState<SparePartTemplate[]>([]);
-  const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "database" | "deviceTypes">("operations");
+  const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "systemSettings" | "deviceTypes">("operations");
+  const [systemTab, setSystemTab] = useState<"database" | "ubuntu">("database");
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"gospodar" | "super_user" | "technician" | null>(null);
 
@@ -548,14 +549,14 @@ export default function ConfigurationPage() {
             </button>
             {userRole === "gospodar" && (
               <button
-                onClick={() => setActiveTab("database")}
+                onClick={() => setActiveTab("systemSettings")}
                 className={`${
-                  activeTab === "database"
+                  activeTab === "systemSettings"
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Povezivanje sa Bazom
+                Sistemska Podešavanja
               </button>
             )}
           </nav>
@@ -620,8 +621,8 @@ export default function ConfigurationPage() {
         <div className="mt-6">
           {activeTab === "deviceTypes" ? (
             <DeviceTypesTab />
-          ) : activeTab === "database" ? (
-            <DatabaseConnectionTab />
+          ) : activeTab === "systemSettings" ? (
+            <SystemSettingsTab systemTab={systemTab} setSystemTab={setSystemTab} />
           ) : isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -1350,6 +1351,228 @@ function DatabaseConnectionTab() {
               <li>DB_PORT={dbConfig.port || "1433"}</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// System Settings Tab Component
+function SystemSettingsTab({
+  systemTab,
+  setSystemTab
+}: {
+  systemTab: "database" | "ubuntu";
+  setSystemTab: (tab: "database" | "ubuntu") => void;
+}) {
+  return (
+    <div>
+      {/* Sub-tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setSystemTab("database")}
+            className={`${
+              systemTab === "database"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+          >
+            Povezivanje sa Bazom
+          </button>
+          <button
+            onClick={() => setSystemTab("ubuntu")}
+            className={`${
+              systemTab === "ubuntu"
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+          >
+            Ubuntu Sistem
+          </button>
+        </nav>
+      </div>
+
+      {/* Content */}
+      {systemTab === "database" ? (
+        <DatabaseConnectionTab />
+      ) : (
+        <UbuntuSystemTab />
+      )}
+    </div>
+  );
+}
+
+// Ubuntu System Tab Component
+function UbuntuSystemTab() {
+  const [systemInfo, setSystemInfo] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    fetchSystemInfo();
+  }, []);
+
+  const fetchSystemInfo = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/system/info");
+      const data = await response.json();
+      if (data.success) {
+        setSystemInfo(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching system info:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateSystem = async () => {
+    if (!confirm("Da li ste sigurni da želite da ažurirate sistem? Ovo može potrajati nekoliko minuta.")) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch("/api/system/update", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        alert("Sistem je uspešno ažuriran!");
+        fetchSystemInfo();
+      } else {
+        alert(`Greška: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error updating system:", error);
+      alert("Greška pri ažuriranju sistema");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* System Information */}
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Informacije o Sistemu</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* OS Version */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Trenutna Verzija Sistema</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {systemInfo?.osVersion || "Ubuntu 22.04 LTS"}
+            </p>
+          </div>
+
+          {/* Kernel Version */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Kernel Verzija</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {systemInfo?.kernelVersion || "Loading..."}
+            </p>
+          </div>
+
+          {/* Disk Space */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Prostor na Disku</p>
+            <p className="text-lg font-semibold text-gray-900">
+              {systemInfo?.diskSpace?.used || "0"} / {systemInfo?.diskSpace?.total || "0"}
+            </p>
+            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full ${
+                  (systemInfo?.diskSpace?.percentage || 0) > 80 ? "bg-red-500" : "bg-green-500"
+                }`}
+                style={{ width: `${systemInfo?.diskSpace?.percentage || 0}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {systemInfo?.diskSpace?.percentage || 0}% iskorišćeno
+            </p>
+          </div>
+
+          {/* Update Status */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Status Ažuriranja</p>
+            <p className={`text-lg font-semibold ${
+              systemInfo?.updateAvailable ? "text-orange-600" : "text-green-600"
+            }`}>
+              {systemInfo?.updateAvailable ? "Ažuriranje dostupno" : "Sistem je ažuriran"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Web Admin Git Version */}
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Web Admin Aplikacija</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-indigo-50 rounded-lg">
+            <p className="text-sm text-indigo-600 mb-1">Git Verzija</p>
+            <p className="text-lg font-semibold text-gray-900 font-mono">
+              {systemInfo?.gitVersion || "Loading..."}
+            </p>
+          </div>
+
+          <div className="p-4 bg-indigo-50 rounded-lg">
+            <p className="text-sm text-indigo-600 mb-1">Branch</p>
+            <p className="text-lg font-semibold text-gray-900 font-mono">
+              {systemInfo?.gitBranch || "main"}
+            </p>
+          </div>
+
+          <div className="p-4 bg-indigo-50 rounded-lg">
+            <p className="text-sm text-indigo-600 mb-1">Poslednja Izmena</p>
+            <p className="text-sm text-gray-900">
+              {systemInfo?.lastCommitDate || "Loading..."}
+            </p>
+          </div>
+
+          <div className="p-4 bg-indigo-50 rounded-lg">
+            <p className="text-sm text-indigo-600 mb-1">Commit Message</p>
+            <p className="text-sm text-gray-900 truncate">
+              {systemInfo?.lastCommitMessage || "Loading..."}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Akcije</h3>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleUpdateSystem}
+            disabled={isUpdating}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            {isUpdating ? "Ažuriranje u toku..." : "Ažuriraj Sistem"}
+          </button>
+
+          <button
+            onClick={fetchSystemInfo}
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+          >
+            Osveži Informacije
+          </button>
+        </div>
+
+        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-800">
+            <strong>Napomena:</strong> Ažuriranje sistema može potrajati nekoliko minuta. Aplikacija će možda biti nedostupna tokom ažuriranja.
+          </p>
         </div>
       </div>
     </div>
