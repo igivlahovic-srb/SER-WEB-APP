@@ -235,7 +235,7 @@ export default function HistoryScreen() {
           <View className="flex-row items-center gap-2">
             <Ionicons name="calendar-outline" size={20} color="#6B7280" />
             <Text className="text-gray-700 text-sm font-medium">
-              {format(dateFrom, "dd.MM.yyyy")} - {format(dateTo, "dd.MM.yyyy")}
+              {format(dateFrom, "dd.MM.yyyy")}{" - "}{format(dateTo, "dd.MM.yyyy")}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
