@@ -194,7 +194,7 @@ export default function HistoryScreen() {
                 filter === "all" ? "text-white" : "text-gray-600"
               }`}
             >
-              Svi ({tickets.length})
+              {"Svi ("}{tickets.length}{")"}
             </Text>
           </Pressable>
           <Pressable
@@ -208,7 +208,7 @@ export default function HistoryScreen() {
                 filter === "in_progress" ? "text-white" : "text-gray-600"
               }`}
             >
-              U toku ({tickets.filter((t) => t.status === "in_progress").length})
+              {"U toku ("}{tickets.filter((t) => t.status === "in_progress").length}{")"}
             </Text>
           </Pressable>
           <Pressable
@@ -222,7 +222,7 @@ export default function HistoryScreen() {
                 filter === "completed" ? "text-white" : "text-gray-600"
               }`}
             >
-              Završeno ({tickets.filter((t) => t.status === "completed").length})
+              {"Završeno ("}{tickets.filter((t) => t.status === "completed").length}{")"}
             </Text>
           </Pressable>
         </View>
