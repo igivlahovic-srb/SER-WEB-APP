@@ -98,21 +98,21 @@ export async function POST(request: Request) {
       const { promisify } = require("util");
       const execAsync = promisify(exec);
 
-      // Try systemd first
+      // Try PM2 first
       try {
-        await execAsync("sudo systemctl restart lafantana-admin");
+        await execAsync("pm2 restart lafantana-whs-admin");
         restartMessage = " Servis je automatski restartovan.";
       } catch {
-        // Try PM2
+        // Try systemd
         try {
-          await execAsync("pm2 restart lafantana-whs-admin");
+          await execAsync("sudo systemctl restart lafantana-admin");
           restartMessage = " Servis je automatski restartovan.";
         } catch {
-          restartMessage = " Molimo restartujte aplikaciju ručno da bi promene stupile na snagu.";
+          restartMessage = " Molimo restartujte aplikaciju ručno: pm2 restart lafantana-whs-admin";
         }
       }
     } catch {
-      restartMessage = " Molimo restartujte aplikaciju ručno da bi promene stupile na snagu.";
+      restartMessage = " Molimo restartujte aplikaciju ručno: pm2 restart lafantana-whs-admin";
     }
 
     return NextResponse.json({

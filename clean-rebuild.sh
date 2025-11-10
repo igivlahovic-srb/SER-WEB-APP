@@ -28,8 +28,9 @@ bun run build
 
 echo "✅ Clean rebuild complete!"
 echo ""
-echo "Now restart the service:"
-echo "  sudo systemctl restart lafantana-admin"
-echo ""
-echo "Or if using PM2:"
+echo "Now restart the service with PM2:"
 echo "  pm2 restart lafantana-whs-admin"
+echo ""
+echo "Or check PM2 status:"
+echo "  pm2 status"
+echo "  pm2 logs lafantana-whs-admin"
