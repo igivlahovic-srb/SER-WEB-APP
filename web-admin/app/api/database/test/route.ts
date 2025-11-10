@@ -29,11 +29,35 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Database test error:", error);
+
+    // Provide more detailed error messages
+    let errorMessage = `Database connection failed: ${error.message}`;
+    let troubleshooting = [];
+
+    if (error.message?.includes("Could not connect")) {
+      troubleshooting.push("- Proverite da li je SQL Server pokrenut na " + process.env.DB_SERVER);
+      troubleshooting.push("- Proverite firewall podešavanja (port " + (process.env.DB_PORT || "1433") + ")");
+      troubleshooting.push("- Proverite da li je TCP/IP protokol omogućen u SQL Server Configuration Manager");
+    } else if (error.message?.includes("Login failed")) {
+      troubleshooting.push("- Proverite korisničko ime i lozinku");
+      troubleshooting.push("- Proverite da li korisnik ima pristup bazi " + process.env.DB_NAME);
+    } else if (error.message?.includes("Cannot open database")) {
+      troubleshooting.push("- Proverite da li baza podataka " + process.env.DB_NAME + " postoji");
+      troubleshooting.push("- Proverite dozvole korisnika");
+    }
+
     return NextResponse.json(
       {
         success: false,
-        message: `Database connection failed: ${error.message}`,
+        message: errorMessage,
         error: error.message,
+        config: {
+          server: process.env.DB_SERVER,
+          database: process.env.DB_NAME,
+          user: process.env.DB_USER,
+          port: process.env.DB_PORT || "1433",
+        },
+        troubleshooting: troubleshooting.length > 0 ? troubleshooting : undefined,
       },
       { status: 500 }
     );

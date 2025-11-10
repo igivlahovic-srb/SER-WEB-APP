@@ -884,6 +884,7 @@ function DatabaseConnectionTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [troubleshooting, setTroubleshooting] = useState<string[]>([]);
 
   // Load existing config on mount
   useEffect(() => {
@@ -933,6 +934,7 @@ function DatabaseConnectionTab() {
   const handleTestConnection = async () => {
     setIsLoading(true);
     setTestResult(null);
+    setTroubleshooting([]);
     try {
       const response = await fetch("/api/database/test");
       const data = await response.json();
@@ -942,9 +944,12 @@ function DatabaseConnectionTab() {
         setTestResult("Konekcija uspešna! ✓");
       } else {
         setIsConnected(false);
-        setTestResult(`Greška: ${data.message}`);
+        setTestResult(`${data.message}`);
+        if (data.troubleshooting) {
+          setTroubleshooting(data.troubleshooting);
+        }
       }
-    } catch {
+    } catch (error) {
       setIsConnected(false);
       setTestResult("Greška pri povezivanju sa bazom");
     } finally {
@@ -1067,12 +1072,22 @@ function DatabaseConnectionTab() {
               }`}
             >
               <p
-                className={`text-sm ${
+                className={`text-sm font-semibold mb-2 ${
                   isConnected ? "text-green-800" : "text-red-800"
                 }`}
               >
                 {testResult}
               </p>
+              {troubleshooting.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-red-200">
+                  <p className="text-sm font-semibold text-red-900 mb-2">Troubleshooting:</p>
+                  <ul className="text-sm text-red-800 space-y-1 list-none">
+                    {troubleshooting.map((tip, index) => (
+                      <li key={index}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
