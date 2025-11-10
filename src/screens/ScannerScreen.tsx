@@ -129,26 +129,32 @@ export default function ScannerScreen() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
-  // Generate next service number in format WHS1001, WHS1002, etc.
+  // Generate next service number in format {CharismaId}_1001, {CharismaId}_1002, etc.
   const generateServiceNumber = (): string => {
-    if (tickets.length === 0) {
-      return "WHS1001";
+    const charismaId = user?.charismaId || "UNKNOWN";
+
+    // Get all tickets for this user (by charismaId)
+    const userTickets = tickets.filter((t) =>
+      t.serviceNumber && t.serviceNumber.startsWith(`${charismaId}_`)
+    );
+
+    if (userTickets.length === 0) {
+      return `${charismaId}_1001`;
     }
 
     // Extract all service numbers and find the highest
-    const serviceNumbers = tickets
+    const serviceNumbers = userTickets
       .map((t) => t.serviceNumber)
-      .filter((num) => num && num.startsWith("WHS"))
-      .map((num) => parseInt(num.replace("WHS", ""), 10))
+      .map((num) => parseInt(num.split("_")[1], 10))
       .filter((num) => !isNaN(num));
 
     if (serviceNumbers.length === 0) {
-      return "WHS1001";
+      return `${charismaId}_1001`;
     }
 
     const maxNumber = Math.max(...serviceNumbers);
     const nextNumber = maxNumber + 1;
-    return `WHS${nextNumber}`;
+    return `${charismaId}_${nextNumber}`;
   };
 
   const createTicketWithCode = (code: string) => {

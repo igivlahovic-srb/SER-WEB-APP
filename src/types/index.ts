@@ -25,7 +25,7 @@ export interface Operation {
 
 export interface ServiceTicket {
   id: string;
-  serviceNumber: string; // Format: WHS1001, WHS1002, itd.
+  serviceNumber: string; // Format: {CharismaId}_1001, {CharismaId}_1002, itd.
   deviceCode: string;
   deviceLocation?: string;
   technicianId: string;
