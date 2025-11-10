@@ -6,6 +6,7 @@ import { User, ServiceTicket } from "../../types";
 import { format } from "date-fns";
 import UpdateNotification from "../../components/UpdateNotification";
 import Navigation from "../../components/Navigation";
+import Footer from "../../components/Footer";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<Omit<User, "password"> | null>(null);
@@ -434,6 +435,7 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

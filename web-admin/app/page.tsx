@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Footer from "../components/Footer";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -164,9 +165,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-gray-500 text-sm mt-6">
-          La Fantana WHS Management System v1.0
-        </p>
+        <Footer />
       </div>
     </div>
   );
