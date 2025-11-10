@@ -7,8 +7,6 @@ module.exports = {
     "**/dist/**",
     "**/data/**",
     "**/*.config.js",
-    "web-admin/.next/**",
-    "web-admin/out/**",
-    "web-admin/data/**",
+    "web-admin/**",
   ],
 };

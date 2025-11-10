@@ -130,6 +130,25 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        allUsers: state.allUsers.map((u) => ({
+          ...u,
+          createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : u.createdAt,
+        })),
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state && state.allUsers) {
+          state.allUsers = state.allUsers.map((u) => ({
+            ...u,
+            createdAt: typeof u.createdAt === "string" ? new Date(u.createdAt) : u.createdAt,
+          }));
+        }
+        if (state && state.user && state.user.createdAt) {
+          state.user.createdAt = typeof state.user.createdAt === "string" ? new Date(state.user.createdAt) : state.user.createdAt;
+        }
+      },
     }
   )
 );

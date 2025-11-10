@@ -3,6 +3,9 @@ const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 
 module.exports = defineConfig([
+  {
+    ignores: ["web-admin/**"],
+  },
   expoConfig,
   {
     ignores: [
@@ -16,6 +19,9 @@ module.exports = defineConfig([
       "eslint.config.js",
       "COMPLETE_WEB_SERVER.js",
       "WEB_*.md",
+      "web-admin",
+      "web-admin/**",
+      "web-admin/**/*",
       "**/web-admin",
       "**/web-admin/**",
       "**/web-admin/.next",
