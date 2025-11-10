@@ -4,7 +4,7 @@ import { join } from "path";
 
 export async function GET() {
   try {
-    const envPath = join(process.cwd(), "..", ".env.local");
+    const envPath = join(process.cwd(), ".env.local");
 
     try {
       const envContent = await readFile(envPath, "utf-8");
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const envPath = join(process.cwd(), "..", ".env.local");
+    const envPath = join(process.cwd(), ".env.local");
 
     // Read existing env file or create new
     let envContent = "";
