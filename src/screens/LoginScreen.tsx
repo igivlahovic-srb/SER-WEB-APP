@@ -122,25 +122,30 @@ export default function LoginScreen() {
             className="flex-1"
           >
             <View className="flex-1 justify-center px-6">
-              {/* Logo/Title Section - Identical to Portal */}
-              <View className="items-center mb-12">
-                {/* La Fantana Logo - BELA slova kao na portalu */}
-                <Image
-                  source={require("../../assets/icon.png")}
-                  style={{
-                    width: 160,
-                    height: 160,
-                    borderRadius: 16,
-                    marginBottom: 24,
-                  }}
-                  resizeMode="contain"
-                />
+              {/* Logo/Header Section - IDENTIČNO kao na portalu */}
+              <View className="items-center mb-8">
+                {/* Plavi gradient kvadrat sa belim LA FANTANA logom */}
+                <View style={{
+                  width: 160,
+                  height: 160,
+                  borderRadius: 16,
+                  marginBottom: 24,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.23,
+                  shadowRadius: 11,
+                  elevation: 12,
+                }}>
+                  <Image
+                    source={require("../../assets/icon.png")}
+                    style={{ width: 160, height: 160, borderRadius: 16 }}
+                    resizeMode="contain"
+                  />
+                </View>
                 <Text className="text-white text-3xl font-bold mb-2">
                   La Fantana WHS
                 </Text>
-                <Text className="text-blue-100 text-base text-center font-medium">
-                  Admin Panel
-                </Text>
+                <Text className="text-blue-200 text-base">Admin Panel</Text>
 
                 {/* Update checking indicator */}
                 {checkingUpdate && (
