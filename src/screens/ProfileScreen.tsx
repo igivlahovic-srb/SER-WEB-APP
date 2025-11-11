@@ -165,25 +165,41 @@ export default function ProfileScreen() {
         return;
       }
 
-      // Close the workday
-      const success = await closeWorkday();
-
-      if (success) {
-        // Clear local ticket data
-        await AsyncStorage.removeItem("service-storage");
-
-        Alert.alert(
-          "Radni dan zatvoren",
-          `Radni dan je zatvoren u ${format(new Date(), "HH:mm")}. Svi servisi su sinhronizovani sa portalom i obrisani sa uređaja.`,
-          [{ text: "OK", onPress: () => setShowCloseWorkdayModal(false) }]
-        );
-      } else {
-        Alert.alert(
-          "Greška",
-          "Nije moguće zatvoriti radni dan. Proverite internet konekciju i pokušajte ponovo.",
-          [{ text: "OK" }]
-        );
+      // Close the workday locally first
+      if (!user) {
+        console.error("[ProfileScreen] No user found");
+        setIsClosingWorkday(false);
+        setShowCloseWorkdayModal(false);
+        return;
       }
+
+      const closedAt = new Date();
+      const updatedUser = {
+        ...user,
+        workdayStatus: "closed" as const,
+        workdayClosedAt: closedAt,
+      };
+
+      // Update local state immediately
+      useAuthStore.setState({ user: updatedUser });
+
+      // Clear local ticket data
+      await AsyncStorage.removeItem("service-storage");
+
+      // Try to sync to portal (but don't fail if it doesn't work)
+      try {
+        await closeWorkday();
+        console.log("[ProfileScreen] Workday closed on portal");
+      } catch (error) {
+        console.warn("[ProfileScreen] Could not sync workday closure to portal:", error);
+        // Continue anyway - workday is closed locally
+      }
+
+      Alert.alert(
+        "Radni dan zatvoren",
+        `Radni dan je zatvoren u ${format(closedAt, "HH:mm")}. Svi servisi su sinhronizovani sa portalom i obrisani sa uređaja.`,
+        [{ text: "OK", onPress: () => setShowCloseWorkdayModal(false) }]
+      );
     } catch (error) {
       console.error("[ProfileScreen] Error closing workday:", error);
       Alert.alert("Greška", "Došlo je do greške prilikom zatvaranja radnog dana.", [

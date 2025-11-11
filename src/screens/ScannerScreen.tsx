@@ -86,10 +86,20 @@ export default function ScannerScreen() {
 
     // Check if workday is closed
     if (workdayIsClosed) {
+      // Temporarily block scanning
+      setScanned(true);
       Alert.alert(
         "Radni dan je zatvoren",
         "Ne možete kreirati nove servise jer je radni dan zatvoren. Samo administrator može ponovo otvoriti radni dan.",
-        [{ text: "OK" }]
+        [{
+          text: "OK",
+          onPress: () => {
+            // Reset state after alert is dismissed so camera can scan again
+            setTimeout(() => {
+              setScanned(false);
+            }, 1000);
+          }
+        }]
       );
       return;
     }
