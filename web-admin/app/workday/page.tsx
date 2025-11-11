@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -21,6 +22,7 @@ interface WorkdayLog {
 }
 
 export default function WorkdayPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [logs, setLogs] = useState<WorkdayLog[]>([]);
   const [loading, setLoading] = useState(true);
