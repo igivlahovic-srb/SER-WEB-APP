@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import dataStore from "../../../../../../lib/dataStore";
+import dataStore from "../../../../../lib/dataStore";
 
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: Request,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: ticketId } = await params;
+    const { id: ticketId } = await context.params;
     const tickets = dataStore.getTickets();
 
     const ticketIndex = tickets.findIndex((t) => t.id === ticketId);

@@ -51,7 +51,7 @@ export default function ServicesPage() {
     }
 
     try {
-      const response = await fetch(`/api/sync/tickets/${ticketId}/reopen`, {
+      const response = await fetch(`/api/tickets/${ticketId}/reopen`, {
         method: "POST",
       });
       const data = await response.json();
