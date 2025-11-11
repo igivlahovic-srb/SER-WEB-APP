@@ -52,19 +52,24 @@ export default function UpdateNotification() {
       const data = await response.json();
 
       if (data.success) {
-        alert(data.message);
-        // Wait 3 seconds then reload the page
+        alert(data.message || "Aplikacija se uspešno ažurira. Stranica će se osvežiti za nekoliko sekundi.");
+        // Wait 5 seconds then reload the page
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
+        }, 5000);
       } else {
         alert("Greška: " + data.message);
         setIsUpdating(false);
       }
     } catch (error) {
-      console.error("Error updating:", error);
-      alert("Greška pri ažuriranju aplikacije");
-      setIsUpdating(false);
+      console.error("Update initiated, server restarting:", error);
+      // Server is restarting after successful update - this is expected behavior
+      alert("Ažuriranje je pokrenuto! Aplikacija se restartuje. Stranica će se automatski osvežiti za 10 sekundi.");
+
+      // Give server more time to restart
+      setTimeout(() => {
+        window.location.reload();
+      }, 10000);
     }
   };
 
