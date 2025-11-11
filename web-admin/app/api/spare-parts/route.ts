@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "../../../lib/db";
 
 /**
- * API endpoint to fetch spare parts from SQL database
+ * API endpoint to fetch spare parts from ERP system
  * Fetches items with ItemCode starting with "102"
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check if database is configured
+    // Check if ERP is configured
     if (!process.env.DB_SERVER || !process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASSWORD) {
       return NextResponse.json(
         {
           success: false,
-          message: "Database nije konfigurisan. Idite na Konfiguracija → Povezivanje sa Bazom...",
+          message: "ERP sistem nije konfigurisan. Idite na Konfiguracija → Sistemska Podešavanja...",
         },
         { status: 400 }
       );
@@ -45,11 +45,11 @@ export async function GET(request: NextRequest) {
       data: { spareParts },
     });
   } catch (error: any) {
-    console.error("Error fetching spare parts from database:", error);
+    console.error("Error fetching spare parts from ERP:", error);
     return NextResponse.json(
       {
         success: false,
-        message: `Greška pri učitavanju rezervnih delova: ${error.message}`,
+        message: `Greška pri učitavanju rezervnih delova iz ERP-a: ${error.message}`,
         error: error.message,
       },
       { status: 500 }
