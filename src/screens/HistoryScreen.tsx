@@ -57,6 +57,12 @@ export default function HistoryScreen() {
     return ticketDate >= fromDate && ticketDate <= toDate;
   }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
+  const getEmptyMessage = (): string => {
+    if (filter === "all") return "Još uvek nema zabeleženih servisa";
+    if (filter === "completed") return "Nema završenih servisa";
+    return "Nema servisa u toku";
+  };
+
   const renderTicketCard = (ticket: ServiceTicket) => {
     const canOpen = ticket.status === "in_progress" || isSuperUser;
 
@@ -343,7 +349,7 @@ export default function HistoryScreen() {
               Nema servisa
             </Text>
             <Text className="text-gray-500 text-sm text-center">
-              {filter === "all" ? "Još uvek nema zabeleženih servisa" : filter === "completed" ? "Nema završenih servisa" : "Nema servisa u toku"}
+              {getEmptyMessage()}
             </Text>
           </View>
         ) : (
