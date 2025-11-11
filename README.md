@@ -77,9 +77,11 @@ Za generisanje novih ikona sa belim slovima:
 - `AUTO_BUILD_GUIDE.md`: **NOVO!** Kompletan guide za automatski build sistem
 - `AUTO_UPDATE_ERROR_FIX.md`: **NOVO!** Objašnjenje network error-a u development mode-u
 - `BACKUP_SYSTEM_GUIDE.md`: **NOVO!** Kompletan guide za backup i restore sistem
+- `EAS_CLOUD_VS_LOCAL_BUILD.md`: **NOVO!** Objašnjenje cloud build vs local build (SDK error fix)
 - `ANDROID_BUILD_GUIDE.md`: Manualni Android APK build guide
 - `CREATE_BACKUP.sh`: **NOVO!** Script za kreiranje kompletnog backup-a projekta
 - `DEPLOY_BACKUP_SYSTEM.sh`: **NOVO!** Script za deploy backup sistema na server
+- `DEPLOY_BUILD_FIX.sh`: **NOVO!** Script za deploy cloud build fix-a na server
 - `QUICK_START_DOWNLOAD_LINKS.md`: Quick reference za prikaz download linkova
 - `BIDIRECTIONAL_SYNC_GUIDE.md`: Detaljno objašnjenje bidirekcione sinhronizacije
 - `ICON_GENERATOR_INSTRUCTIONS.md`: Uputstvo za generisanje ikona

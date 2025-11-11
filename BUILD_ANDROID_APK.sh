@@ -58,11 +58,13 @@ npm install
 echo "✓ Dependencies installed"
 echo ""
 
-echo "Step 4/6: Building Android APK with EAS..."
+echo "Step 4/6: Building Android APK with EAS Cloud Build..."
 echo "This will take 5-10 minutes..."
+echo "NOTE: Using EAS cloud build (not local). This requires internet connection."
+echo ""
 
-# Build APK using EAS Build
-npx eas-cli build --platform android --profile production --local --non-interactive
+# Build APK using EAS Build (cloud build, not local)
+npx eas-cli build --platform android --profile production --non-interactive
 
 if [ $? -ne 0 ]; then
     echo "❌ EAS Build failed!"
@@ -77,22 +79,28 @@ fi
 echo "✓ Build completed"
 echo ""
 
-echo "Step 5/6: Moving APK to web portal..."
+echo "Step 5/6: Downloading APK from EAS..."
 mkdir -p "$APK_OUTPUT_DIR"
 
-# Find the built APK (EAS creates it in current directory or build folder)
-APK_FILE=$(find . -name "*.apk" -type f -mmin -30 | head -1)
+# Get the download URL from the last build
+echo "Fetching build details..."
+BUILD_URL=$(npx eas-cli build:list --platform android --limit 1 --json --non-interactive | grep -Po '"url":"https://[^"]*\.apk"' | head -1 | sed 's/"url":"//;s/"//')
 
-if [ -z "$APK_FILE" ]; then
-    echo "❌ APK file not found after build!"
-    echo "Searching in common locations..."
-    find . -name "*.apk" -type f
+if [ -z "$BUILD_URL" ]; then
+    echo "❌ Could not get APK download URL from EAS!"
+    echo "Try manually downloading from: https://expo.dev/accounts/igix/projects/la-fantana-whs-servisni-modul/builds"
     exit 1
 fi
 
-# Copy APK with version name
-cp "$APK_FILE" "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
-echo "✓ APK copied to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
+echo "Downloading APK from: $BUILD_URL"
+curl -L -o "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" "$BUILD_URL"
+
+if [ ! -f "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" ]; then
+    echo "❌ APK download failed!"
+    exit 1
+fi
+
+echo "✓ APK downloaded to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
 echo ""
 
 echo "Step 6/6: Setting permissions and cleaning old builds..."

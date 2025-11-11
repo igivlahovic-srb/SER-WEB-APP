@@ -37,8 +37,9 @@ npm install >> "$LOG_FILE" 2>&1
 echo "✓ Dependencies installed" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 4/6: Building Android APK with EAS..." >> "$LOG_FILE" 2>&1
-npx eas-cli build --platform android --profile production --local --non-interactive >> "$LOG_FILE" 2>&1
+echo "Step 4/6: Building Android APK with EAS Cloud Build..." >> "$LOG_FILE" 2>&1
+echo "NOTE: Using EAS cloud build (not local). This requires internet connection." >> "$LOG_FILE" 2>&1
+npx eas-cli build --platform android --profile production --non-interactive >> "$LOG_FILE" 2>&1
 
 if [ $? -ne 0 ]; then
     echo "❌ EAS Build failed!" >> "$LOG_FILE" 2>&1
@@ -47,20 +48,27 @@ fi
 echo "✓ Build completed" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 5/6: Moving APK to web portal..." >> "$LOG_FILE" 2>&1
+echo "Step 5/6: Downloading APK from EAS..." >> "$LOG_FILE" 2>&1
 mkdir -p "$APK_OUTPUT_DIR" >> "$LOG_FILE" 2>&1
 
-# Find the built APK
-APK_FILE=$(find . -name "*.apk" -type f -mmin -30 | head -1)
+# Get the download URL from the last build
+echo "Fetching build details..." >> "$LOG_FILE" 2>&1
+BUILD_URL=$(npx eas-cli build:list --platform android --limit 1 --json --non-interactive 2>> "$LOG_FILE" | grep -Po '"url":"https://[^"]*\.apk"' | head -1 | sed 's/"url":"//;s/"//')
 
-if [ -z "$APK_FILE" ]; then
-    echo "❌ APK file not found after build!" >> "$LOG_FILE" 2>&1
+if [ -z "$BUILD_URL" ]; then
+    echo "❌ Could not get APK download URL from EAS!" >> "$LOG_FILE" 2>&1
     exit 1
 fi
 
-# Copy APK with version name
-cp "$APK_FILE" "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
-echo "✓ APK copied to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
+echo "Downloading APK from: $BUILD_URL" >> "$LOG_FILE" 2>&1
+curl -L -o "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" "$BUILD_URL" >> "$LOG_FILE" 2>&1
+
+if [ ! -f "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" ]; then
+    echo "❌ APK download failed!" >> "$LOG_FILE" 2>&1
+    exit 1
+fi
+
+echo "✓ APK downloaded to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
 echo "Step 6/6: Setting permissions and cleaning old builds..." >> "$LOG_FILE" 2>&1
