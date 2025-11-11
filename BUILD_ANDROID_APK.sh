@@ -31,12 +31,26 @@ fi
 echo "✓ Version: $VERSION"
 echo ""
 
-echo "Step 2/6: Checking dependencies..."
+echo "Step 2/6: Checking EAS authentication..."
 if ! command -v npx &> /dev/null; then
     echo "❌ npx not found. Please install Node.js"
     exit 1
 fi
-echo "✓ Dependencies OK"
+
+# Check if EAS CLI is authenticated
+if ! npx eas-cli whoami &> /dev/null; then
+    echo "❌ Not logged in to EAS"
+    echo ""
+    echo "Please login first:"
+    echo "  npx eas-cli login"
+    echo ""
+    echo "Or if you have credentials, set environment variables:"
+    echo "  export EXPO_TOKEN=your_token_here"
+    echo ""
+    exit 1
+fi
+
+echo "✓ EAS authentication OK"
 echo ""
 
 echo "Step 3/6: Installing mobile app dependencies..."

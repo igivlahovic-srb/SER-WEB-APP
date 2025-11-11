@@ -19,17 +19,25 @@ APK_OUTPUT_DIR="$WEB_ADMIN_DIR/public/apk"
 
 cd "$MOBILE_APP_DIR" >> "$LOG_FILE" 2>&1
 
-echo "Step 1/5: Reading version from app.json..." >> "$LOG_FILE" 2>&1
+echo "Step 1/6: Checking EAS authentication..." >> "$LOG_FILE" 2>&1
+if ! npx eas-cli whoami >> "$LOG_FILE" 2>&1; then
+    echo "❌ Not logged in to EAS. Please run: eas login" >> "$LOG_FILE" 2>&1
+    exit 1
+fi
+echo "✓ EAS authentication OK" >> "$LOG_FILE" 2>&1
+echo "" >> "$LOG_FILE" 2>&1
+
+echo "Step 2/6: Reading version from app.json..." >> "$LOG_FILE" 2>&1
 VERSION=$(grep -Po '"version": "\K[^"]*' app.json)
 echo "✓ Version: $VERSION" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 2/5: Installing mobile app dependencies..." >> "$LOG_FILE" 2>&1
+echo "Step 3/6: Installing mobile app dependencies..." >> "$LOG_FILE" 2>&1
 npm install >> "$LOG_FILE" 2>&1
 echo "✓ Dependencies installed" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 3/5: Building Android APK with EAS..." >> "$LOG_FILE" 2>&1
+echo "Step 4/6: Building Android APK with EAS..." >> "$LOG_FILE" 2>&1
 npx eas-cli build --platform android --profile production --local --non-interactive >> "$LOG_FILE" 2>&1
 
 if [ $? -ne 0 ]; then
@@ -39,7 +47,7 @@ fi
 echo "✓ Build completed" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 4/5: Moving APK to web portal..." >> "$LOG_FILE" 2>&1
+echo "Step 5/6: Moving APK to web portal..." >> "$LOG_FILE" 2>&1
 mkdir -p "$APK_OUTPUT_DIR" >> "$LOG_FILE" 2>&1
 
 # Find the built APK
@@ -55,7 +63,7 @@ cp "$APK_FILE" "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
 echo "✓ APK copied to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
 echo "" >> "$LOG_FILE" 2>&1
 
-echo "Step 5/5: Setting permissions and cleaning old builds..." >> "$LOG_FILE" 2>&1
+echo "Step 6/6: Setting permissions and cleaning old builds..." >> "$LOG_FILE" 2>&1
 chmod 644 "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk" >> "$LOG_FILE" 2>&1
 echo "✓ Permissions set" >> "$LOG_FILE" 2>&1
 
