@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import dataStore from "../../../../../lib/dataStore";
+import dataStore from "../../../../../../lib/dataStore";
 
 export async function POST(
   request: Request,
