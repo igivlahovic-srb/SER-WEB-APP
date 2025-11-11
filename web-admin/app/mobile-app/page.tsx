@@ -9,6 +9,13 @@ interface MobileAppInfo {
   downloadUrl: string | null;
   fileName: string | null;
   updatedAt: string;
+  builds: Array<{
+    name: string;
+    version: string;
+    size: number;
+    buildDate: string;
+    downloadUrl: string;
+  }>;
 }
 
 export default function MobileAppPage() {
@@ -19,6 +26,26 @@ export default function MobileAppPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState("");
+
+  // Helper funkcija za formatiranje veličine fajla
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  // Helper funkcija za formatiranje datuma
+  const formatBuildDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
+  };
 
   useEffect(() => {
     const userData = sessionStorage.getItem("admin-user");
@@ -217,6 +244,108 @@ export default function MobileAppPage() {
             </div>
           )}
         </div>
+
+        {/* Build History - Poslednja 3 build-a */}
+        {appInfo?.builds && appInfo.builds.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Istorija build-ova (poslednja 3)
+            </h2>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Verzija
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Datum build-a
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Veličina
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Naziv fajla
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
+                      Akcije
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appInfo.builds.map((build, index) => (
+                    <tr
+                      key={build.name}
+                      className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+                        index === 0 ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-blue-600">
+                            v{build.version}
+                          </span>
+                          {index === 0 && (
+                            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                              Najnovije
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-gray-700">
+                          {formatBuildDate(build.buildDate)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-gray-700">
+                          {formatFileSize(build.size)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-gray-600 text-sm font-mono">
+                          {build.name}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <a
+                          href={build.downloadUrl}
+                          download
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                          Preuzmi
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-500">
+              {appInfo.builds.length === 1 && (
+                <p>Prikazuje se 1 build</p>
+              )}
+              {appInfo.builds.length > 1 && (
+                <p>Prikazuju se poslednja {appInfo.builds.length} build-a</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Upload New Version */}
         <div className="bg-white rounded-2xl shadow-sm p-6">

@@ -7,6 +7,7 @@ Implementiran je kompletan sistem za:
 2. ✅ **Auto-upload APK** na web portal
 3. ✅ **Download link** za instalaciju
 4. ✅ **Auto-update check** u mobilnoj aplikaciji
+5. ✅ **Istorija build-ova** - prikazuje poslednja 3 build-a na web portalu
 
 ---
 
@@ -57,6 +58,7 @@ chmod +x BUILD_ANDROID_APK.sh
 3. Build-uje Android APK sa EAS
 4. Kopira APK u `web-admin/public/apk/lafantana-v2.1.0.apk`
 5. Postavlja permissions
+6. **Automatski čuva samo poslednja 3 build-a** (briše starije)
 
 **Trajanje:** 5-10 minuta
 
@@ -64,16 +66,24 @@ chmod +x BUILD_ANDROID_APK.sh
 
 ## 🌐 KORAK 3: Download APK Sa Web Portala
 
-### Web Portal Već Ima `/mobile-app` Tab
+### Web Portal `/mobile-app` Tab
 
 Korisnici mogu:
 1. Otvoriti web portal: `http://appserver.lafantanasrb.local:3002`
 2. Prijaviti se kao super admin
 3. Ići na **"Mobilna aplikacija"** tab
-4. Videti trenutnu verziju
-5. Kliknuti **"Preuzmi APK"** dugme
+4. Videti **trenutnu verziju** (najnoviji build - zeleni badge)
+5. Videti **istoriju build-ova** (poslednja 3 sa datumima i veličinama)
+6. Kliknuti **"Preuzmi"** dugme za bilo koji build
 
-APK će se preuzeti kao: `lafantana-v2.1.0.apk`
+**Nova funkcionalnost:** Web portal prikazuje tabelu sa poslednja 3 build-a, uključujući:
+- Verziju (npr. v2.1.0)
+- Datum build-a (npr. 11.11.2025 14:30)
+- Veličinu fajla (npr. 52.3 MB)
+- Naziv APK fajla
+- Download dugme za svaki build
+
+APK se preuzima kao: `lafantana-v2.1.0.apk`
 
 ---
 
@@ -139,7 +149,14 @@ Script će:
 - Pročitati novu verziju (2.2.0)
 - Build-ovati APK
 - Uploadovati kao `lafantana-v2.2.0.apk`
-- **Automatski obrisati stari APK** (lafantana-v2.1.0.apk)
+- **Automatski čuvati poslednja 3 build-a** (briše starije od 3)
+
+Tako će web portal prikazivati:
+- `lafantana-v2.2.0.apk` (najnoviji - zeleni badge)
+- `lafantana-v2.1.0.apk`
+- `lafantana-v2.0.0.apk`
+
+Stariji build-ovi (npr. v1.9.0) se automatski brišu.
 
 ### 6.3. Korisnici Dobijaju Notifikaciju
 

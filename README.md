@@ -399,7 +399,7 @@ Build script automatski:
 2. Build-uje Android APK sa EAS Build
 3. Kopira APK u `web-admin/public/apk/lafantana-vX.X.X.apk`
 4. Postavlja permissions za download
-5. **Automatski briše stare verzije** da ostaje samo najnovija
+5. **Automatski čuva samo poslednja 3 build-a** (briše starije)
 
 **Za detaljno uputstvo za build:** `ANDROID_BUILD_GUIDE.md`
 

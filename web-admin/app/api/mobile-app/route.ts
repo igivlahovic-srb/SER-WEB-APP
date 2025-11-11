@@ -17,23 +17,47 @@ export async function GET(request: NextRequest) {
 
     let latestApk = null;
     let latestVersion = null;
+    let builds: Array<{
+      name: string;
+      version: string;
+      size: number;
+      buildDate: string;
+      downloadUrl: string;
+    }> = [];
 
     if (files.length > 0) {
       // Sortiraj fajlove po vremenu modifikacije (najnoviji prvi)
       const sortedFiles = files
-        .map((file) => ({
-          name: file,
-          time: fs.statSync(path.join(apkDir, file)).mtime.getTime(),
-          size: fs.statSync(path.join(apkDir, file)).size,
-        }))
+        .map((file) => {
+          const filePath = path.join(apkDir, file);
+          const stats = fs.statSync(filePath);
+          const versionMatch = file.match(/v?(\d+\.\d+\.\d+)/);
+          const version = versionMatch ? versionMatch[1] : "1.0.0";
+
+          return {
+            name: file,
+            version: version,
+            time: stats.mtime.getTime(),
+            size: stats.size,
+            buildDate: stats.mtime.toISOString(),
+            downloadUrl: `/apk/${file}`,
+          };
+        })
         .sort((a, b) => b.time - a.time);
 
+      // Uzmi poslednja 3 build-a
+      builds = sortedFiles.slice(0, 3).map(({ name, version, size, buildDate, downloadUrl }) => ({
+        name,
+        version,
+        size,
+        buildDate,
+        downloadUrl,
+      }));
+
+      // Najnoviji build za backward compatibility
       const latest = sortedFiles[0];
       latestApk = latest.name;
-
-      // Pokušaj da izvučeš verziju iz imena fajla (npr. lafantana-v2.1.0.apk)
-      const versionMatch = latest.name.match(/v?(\d+\.\d+\.\d+)/);
-      latestVersion = versionMatch ? versionMatch[1] : "1.0.0";
+      latestVersion = latest.version;
     }
 
     return NextResponse.json({
@@ -44,6 +68,7 @@ export async function GET(request: NextRequest) {
         downloadUrl: latestApk ? `/apk/${latestApk}` : null,
         fileName: latestApk,
         updatedAt: new Date().toISOString(),
+        builds: builds, // Poslednja 3 build-a sa detaljima
       },
     });
   } catch (error) {

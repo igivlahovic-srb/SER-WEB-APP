@@ -81,9 +81,18 @@ cp "$APK_FILE" "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
 echo "✓ APK copied to: $APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
 echo ""
 
-echo "Step 6/6: Setting permissions..."
+echo "Step 6/6: Setting permissions and cleaning old builds..."
 chmod 644 "$APK_OUTPUT_DIR/lafantana-v${VERSION}.apk"
 echo "✓ Permissions set"
+
+# Čuvaj samo poslednja 3 build-a
+cd "$APK_OUTPUT_DIR"
+BUILD_COUNT=$(ls -t lafantana-*.apk 2>/dev/null | wc -l)
+if [ "$BUILD_COUNT" -gt 3 ]; then
+    echo "Cleaning old builds (keeping latest 3)..."
+    ls -t lafantana-*.apk | tail -n +4 | xargs rm -f
+    echo "✓ Old builds removed"
+fi
 echo ""
 
 echo "================================================"
