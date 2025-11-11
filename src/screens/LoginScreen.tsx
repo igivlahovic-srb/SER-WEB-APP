@@ -121,7 +121,7 @@ export default function LoginScreen() {
             className="flex-1"
           >
             <View className="flex-1 justify-center px-6">
-              {/* Logo/Title Section */}
+              {/* Logo/Title Section - Updated v2.1.0 with white text */}
               <View className="items-center mb-12">
                 <Text className="text-white text-5xl font-extrabold tracking-tight mb-2">
                   LA FANTANA

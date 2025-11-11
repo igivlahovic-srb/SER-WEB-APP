@@ -25,6 +25,7 @@ const openai_api_key = Constants.expoConfig.extra.apikey;
 
 */
 
+// La Fantana WHS v2.1.0 - Bidirectional Sync + Login Screen Logo Fix
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
