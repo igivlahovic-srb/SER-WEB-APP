@@ -31,7 +31,7 @@ export default function WorkdayPage() {
 
   const currentUser =
     typeof window !== "undefined"
-      ? JSON.parse(sessionStorage.getItem("user") || "null")
+      ? JSON.parse(sessionStorage.getItem("admin-user") || "null")
       : null;
 
   useEffect(() => {
