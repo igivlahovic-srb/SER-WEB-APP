@@ -211,6 +211,58 @@ class WebAdminAPI {
       };
     }
   }
+
+  // Close workday for a user
+  async closeWorkday(userId: string, closedAt: Date): Promise<SyncResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/api/workday/close`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, closedAt: closedAt.toISOString() }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error closing workday:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  // Open workday for a user (admin only)
+  async openWorkday(userId: string, reason: string, adminId: string): Promise<SyncResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/api/workday/open`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, reason, adminId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error opening workday:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }
 
 // Singleton instance

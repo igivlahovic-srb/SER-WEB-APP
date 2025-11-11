@@ -16,6 +16,8 @@ interface AuthState {
   toggleUserActive: (id: string) => void;
   syncToWeb: () => Promise<boolean>;
   fetchFromWeb: () => Promise<boolean>;
+  closeWorkday: () => Promise<boolean>;
+  openWorkday: (userId: string, reason: string, adminId: string) => Promise<boolean>;
 }
 
 // Mock users for demo - in production, this would call an API
@@ -128,6 +130,55 @@ export const useAuthStore = create<AuthState>()(
           return false;
         } catch (error) {
           console.error("Failed to fetch users from web:", error);
+          return false;
+        }
+      },
+      closeWorkday: async () => {
+        try {
+          const currentUser = get().user;
+          if (!currentUser) {
+            console.error("[AuthStore] No user logged in");
+            return false;
+          }
+
+          const closedAt = new Date();
+          const updatedUser = {
+            ...currentUser,
+            workdayStatus: "closed" as const,
+            workdayClosedAt: closedAt,
+          };
+
+          set({ user: updatedUser });
+
+          // Sync to web portal
+          const result = await webAdminAPI.closeWorkday(currentUser.id, closedAt);
+          return result.success;
+        } catch (error) {
+          console.error("[AuthStore] Failed to close workday:", error);
+          return false;
+        }
+      },
+      openWorkday: async (userId: string, reason: string, adminId: string) => {
+        try {
+          const result = await webAdminAPI.openWorkday(userId, reason, adminId);
+          if (result.success) {
+            // Update local state
+            const currentUser = get().user;
+            if (currentUser && currentUser.id === userId) {
+              set({
+                user: {
+                  ...currentUser,
+                  workdayStatus: "open",
+                  workdayClosedAt: undefined,
+                  workdayOpenedBy: adminId,
+                  workdayReopenReason: reason,
+                },
+              });
+            }
+          }
+          return result.success;
+        } catch (error) {
+          console.error("[AuthStore] Failed to open workday:", error);
           return false;
         }
       },

@@ -9,6 +9,10 @@ export interface User {
   depot: string;
   isActive: boolean;
   createdAt: Date;
+  workdayStatus?: "open" | "closed";
+  workdayClosedAt?: Date | string;
+  workdayOpenedBy?: string; // User ID who reopened the workday
+  workdayReopenReason?: string; // Reason for reopening
 }
 
 export interface SparePart {

@@ -22,6 +22,10 @@ const menuItems: MenuItem[] = [
     path: "/dashboard/services",
   },
   {
+    label: "Radni dani",
+    path: "/workday",
+  },
+  {
     label: "Konfiguracija",
     path: "/configuration",
   },

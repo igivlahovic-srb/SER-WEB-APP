@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, Modal } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -8,6 +8,8 @@ import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuthStore } from "../state/authStore";
 import { useServiceStore } from "../state/serviceStore";
 import { useSyncStore } from "../state/syncStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { format } from "date-fns";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -16,8 +18,12 @@ export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const tickets = useServiceStore((s) => s.tickets);
+  const closeWorkday = useAuthStore((s) => s.closeWorkday);
+  const syncToWeb = useServiceStore((s) => s.syncToWeb);
 
   const [syncing, setSyncing] = useState(false);
+  const [showCloseWorkdayModal, setShowCloseWorkdayModal] = useState(false);
+  const [isClosingWorkday, setIsClosingWorkday] = useState(false);
 
   const apiUrl = useSyncStore((s) => s.apiUrl);
   const isSyncing = useSyncStore((s) => s.isSyncing);
@@ -29,6 +35,8 @@ export default function ProfileScreen() {
   const bidirectionalSyncTickets = useServiceStore((s) => s.bidirectionalSync);
 
   const isSuperUser = user?.role === "super_user";
+  const isTechnician = user?.role === "technician";
+  const workdayIsClosed = user?.workdayStatus === "closed";
 
   const myTickets = isSuperUser
     ? tickets
@@ -120,6 +128,69 @@ export default function ProfileScreen() {
     } finally {
       setSyncing(false);
       setIsSyncing(false);
+    }
+  };
+
+  const handleCloseWorkday = async () => {
+    setIsClosingWorkday(true);
+    try {
+      // Check for active tickets
+      const myActiveTickets = tickets.filter(
+        (t) => t.technicianId === user?.id && t.status === "in_progress"
+      );
+
+      if (myActiveTickets.length > 0) {
+        Alert.alert(
+          "Imate aktivne servise",
+          `Imate ${myActiveTickets.length} aktivnih servisa. Molimo završite sve servise pre zatvaranja radnog dana.`,
+          [{ text: "OK" }]
+        );
+        setIsClosingWorkday(false);
+        setShowCloseWorkdayModal(false);
+        return;
+      }
+
+      // Sync all tickets to web portal
+      console.log("[ProfileScreen] Syncing tickets before closing workday...");
+      const syncSuccess = await syncToWeb();
+
+      if (!syncSuccess) {
+        Alert.alert(
+          "Greška sinhronizacije",
+          "Nije moguće sinhronizovati servise sa portalom. Proverite internet konekciju i pokušajte ponovo.",
+          [{ text: "OK" }]
+        );
+        setIsClosingWorkday(false);
+        setShowCloseWorkdayModal(false);
+        return;
+      }
+
+      // Close the workday
+      const success = await closeWorkday();
+
+      if (success) {
+        // Clear local ticket data
+        await AsyncStorage.removeItem("service-storage");
+
+        Alert.alert(
+          "Radni dan zatvoren",
+          `Radni dan je zatvoren u ${format(new Date(), "HH:mm")}. Svi servisi su sinhronizovani sa portalom i obrisani sa uređaja.`,
+          [{ text: "OK", onPress: () => setShowCloseWorkdayModal(false) }]
+        );
+      } else {
+        Alert.alert(
+          "Greška",
+          "Nije moguće zatvoriti radni dan. Proverite internet konekciju i pokušajte ponovo.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.error("[ProfileScreen] Error closing workday:", error);
+      Alert.alert("Greška", "Došlo je do greške prilikom zatvaranja radnog dana.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setIsClosingWorkday(false);
     }
   };
 
@@ -300,6 +371,40 @@ export default function ProfileScreen() {
               </View>
             </View>
           )}
+
+          {/* Close Workday Button - Only for Technicians */}
+          {isTechnician && !workdayIsClosed && (
+            <Pressable
+              onPress={() => setShowCloseWorkdayModal(true)}
+              className="bg-orange-50 border border-orange-200 rounded-2xl px-6 py-4 flex-row items-center justify-center gap-3 active:opacity-70"
+            >
+              <Ionicons name="moon-outline" size={24} color="#F97316" />
+              <Text className="text-orange-600 text-base font-bold">
+                Zatvori radni dan
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Workday Closed Info - Only for Technicians */}
+          {isTechnician && workdayIsClosed && (
+            <View className="bg-gray-100 rounded-2xl p-4 border border-gray-300">
+              <View className="flex-row items-start gap-3">
+                <Ionicons name="lock-closed" size={20} color="#6B7280" />
+                <View className="flex-1">
+                  <Text className="text-gray-900 text-sm font-semibold mb-1">
+                    Radni dan je zatvoren
+                  </Text>
+                  <Text className="text-gray-600 text-xs leading-4">
+                    {user?.workdayClosedAt &&
+                      `Zatvoren u ${format(
+                        new Date(user.workdayClosedAt),
+                        "HH:mm, dd.MM.yyyy"
+                      )}. Samo administrator može ponovo otvoriti radni dan.`}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Logout Button */}
@@ -320,6 +425,62 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Close Workday Modal */}
+      <Modal
+        visible={showCloseWorkdayModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCloseWorkdayModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-3xl p-6 w-full max-w-md">
+            <View className="items-center mb-4">
+              <View className="w-16 h-16 bg-orange-100 rounded-full items-center justify-center mb-3">
+                <Ionicons name="moon" size={32} color="#F97316" />
+              </View>
+              <Text className="text-gray-900 text-xl font-bold mb-2">
+                Zatvori radni dan
+              </Text>
+              <Text className="text-gray-600 text-sm text-center">
+                Da li ste sigurni da želite da zatvorite radni dan? Svi servisi će
+                biti sinhronizovani sa portalom i obrisani sa uređaja.
+              </Text>
+            </View>
+
+            <View className="gap-3">
+              <Pressable
+                onPress={handleCloseWorkday}
+                disabled={isClosingWorkday}
+                className={`rounded-2xl px-6 py-4 flex-row items-center justify-center gap-3 ${
+                  isClosingWorkday ? "bg-gray-100" : "bg-orange-500 active:opacity-70"
+                }`}
+              >
+                {isClosingWorkday ? (
+                  <>
+                    <ActivityIndicator color="#F97316" />
+                    <Text className="text-orange-600 text-base font-bold">
+                      Zatvaranje...
+                    </Text>
+                  </>
+                ) : (
+                  <Text className="text-white text-base font-bold">
+                    Zatvori radni dan
+                  </Text>
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => setShowCloseWorkdayModal(false)}
+                disabled={isClosingWorkday}
+                className="bg-gray-100 rounded-2xl px-6 py-4 flex-row items-center justify-center active:opacity-70"
+              >
+                <Text className="text-gray-700 text-base font-bold">Otkaži</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -39,6 +39,26 @@ Za generisanje novih ikona sa belim slovima:
 - **Ikone**: Ažurirane aplikacione ikone sa belim slovima na plavom gradijent pozadini
 
 ### 🆕 Nove Funkcionalnosti
+- **📅 Upravljanje Radnim Danima** 🌙
+  - **Mobilna aplikacija (Profil tab):**
+    - Dugme "Zatvori radni dan" za tehničare u tabu Profil
+    - Automatska sinhronizacija svih servisa pre zatvaranja
+    - Brisanje lokalnih podataka nakon zatvaranja radnog dana
+    - Provera da nema aktivnih servisa pre zatvaranja
+    - Prikaz statusa radnog dana (otvoren/zatvoren) sa timestamp-om
+    - Samo administrator može ponovo otvoriti radni dan sa portala
+  - **Web Admin Panel (Radni dani tab):**
+    - Pregled svih servisera sa zatvorenim radnim danima
+    - Otvaranje radnog dana sa **obaveznim pisanim obrazloženjem** (min. 10 karaktera)
+    - Istorija svih otvaranja radnih dana sa razlozima
+    - Log zapisa sa timestamp-om, imenom servisera, imenom admina i razlogom
+    - Pristup samo za super_user i gospodar uloge
+  - **Backend API:**
+    - `/api/workday/close` - Endpoint za zatvaranje radnog dana
+    - `/api/workday/open` - Endpoint za otvaranje radnog dana (POST) i čitanje log-a (GET)
+    - Validacija uloga i obaveznih polja
+    - Čuvanje workday statusa u `data/users.json`
+    - Čuvanje log-a u `data/workday-log.json`
 - **Bidirekciona Sinhronizacija**: Mobilna aplikacija sada preuzima i šalje servise sa/na web portal
   - Servisi otvoreni na portalu se automatski prikazuju u mobilnoj app
   - Inteligentno spajanje - koristi se najnovija verzija svakog servisa
@@ -179,6 +199,11 @@ La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisni
   - Utrošeni delovi
 - **Informacije o nalogu**: Korisničko ime, ime, uloga
 - **Brza sinhronizacija**: Direktno dugme za sinhronizaciju podataka (dostupno svima)
+- **Zatvori radni dan**: Dugme za zatvaranje radnog dana (samo tehničari)
+  - Automatska sinhronizacija svih servisa pre zatvaranja
+  - Provera da nema aktivnih servisa
+  - Brisanje lokalnih podataka nakon zatvaranja
+  - Prikaz statusa radnog dana (otvoren/zatvoren)
 - **Podešavanja (Settings)**: Pristup web admin sync funkcionalnosti (samo super admin)
 - **Sigurna odjava**: Potvrda pre odjave
 
@@ -300,6 +325,7 @@ Detaljnije informacije: `IOS_REFRESH_GUIDE.md`
 6. Završetak servisa
 7. Pregled istorije svih servisa
 8. **Sinhronizacija podataka**: Profil → "Sinhronizuj podatke" dugme
+9. **Zatvaranje radnog dana**: Profil → "Zatvori radni dan" dugme (nakon završetka svih servisa)
 
 ### Za super usera:
 1. Prijava sa naloga
@@ -315,6 +341,10 @@ Detaljnije informacije: `IOS_REFRESH_GUIDE.md`
    - Pristup Settings ekranu iz Profila
    - Konfiguracija URL-a web panela
    - Sinhronizacija svih korisnika i servisa
+7. **Upravljanje radnim danima** (na web portalu):
+   - Pregled servisera sa zatvorenim radnim danima
+   - Otvaranje radnog dana sa pisanim obrazloženjem
+   - Pregled istorije otvaranja radnih dana
 
 ## 🌐 Web Admin Panel
 
@@ -393,6 +423,11 @@ Instalacioni script automatski instalira Node.js, Bun, sve pakete, pravi build, 
 - **👥 Korisnici**: Pregled svih korisnika, filtriranje po statusu
 - **🔧 Servisi**: Kompletna istorija svih servisa sa detaljima
 - **🔍 Detalji servisa**: Klik na servis pokazuje sve operacije i rezervne delove
+- **📅 Radni dani**: Upravljanje radnim danima servisera (samo admin)
+  - Pregled servisera sa zatvorenim radnim danima
+  - Otvaranje radnog dana sa obaveznim obrazloženjem (min. 10 karaktera)
+  - Istorija svih otvaranja radnih dana sa timestamp-om, imenom servisera, admina i razlogom
+  - Validacija uloga - pristup samo za super_user i gospodar
 - **⚙️ Konfiguracija**:
   - **Operacije tabela** sa kolonama: ItemId, ItemCode, ItemName, Opis, Status
   - **Rezervni delovi tabela** sa kolonama: ItemId, ItemCode, ItemName, Jedinica, Status
