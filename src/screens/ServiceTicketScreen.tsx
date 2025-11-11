@@ -50,6 +50,7 @@ export default function ServiceTicketScreen() {
 
   const isSuperUser = user?.role === "super_user";
   const isCompleted = currentTicket?.status === "completed";
+  const workdayIsClosed = user?.workdayStatus === "closed";
 
   // Fetch config on mount if empty
   useEffect(() => {
@@ -88,6 +89,17 @@ export default function ServiceTicketScreen() {
   }
 
   const handleAddOperation = (op: { name: string; description?: string }) => {
+    // Check if workday is closed
+    if (workdayIsClosed) {
+      Alert.alert(
+        "Radni dan je zatvoren",
+        "Ne možete dodavati operacije jer je radni dan zatvoren.",
+        [{ text: "OK" }]
+      );
+      setShowOperationsModal(false);
+      return;
+    }
+
     // Check if operation already exists in current ticket
     const alreadyExists = currentTicket.operations.some(
       (existingOp) => existingOp.name === op.name
@@ -109,6 +121,17 @@ export default function ServiceTicketScreen() {
   };
 
   const handleAddSparePart = (part: { name: string }) => {
+    // Check if workday is closed
+    if (workdayIsClosed) {
+      Alert.alert(
+        "Radni dan je zatvoren",
+        "Ne možete dodavati rezervne delove jer je radni dan zatvoren.",
+        [{ text: "OK" }]
+      );
+      setShowSparePartsModal(false);
+      return;
+    }
+
     // Check if spare part already exists in current ticket
     const existingPart = currentTicket.spareParts.find(
       (existingSp) => existingSp.name === part.name
@@ -137,6 +160,16 @@ export default function ServiceTicketScreen() {
   };
 
   const handleComplete = () => {
+    // Check if workday is closed
+    if (workdayIsClosed) {
+      Alert.alert(
+        "Radni dan je zatvoren",
+        "Ne možete završiti servis jer je radni dan zatvoren.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
     Alert.alert(
       "Završi servis",
       "Da li ste sigurni da želite da završite ovaj servis?",
@@ -272,7 +305,7 @@ export default function ServiceTicketScreen() {
         <View className="px-6 py-4">
           <View className="flex-row items-center justify-between mb-3">
             <Text className="text-gray-900 text-lg font-bold">Operacije</Text>
-            {!isCompleted && (
+            {!isCompleted && !workdayIsClosed && (
               <Pressable
                 onPress={() => setShowOperationsModal(true)}
                 className="flex-row items-center gap-2 bg-blue-600 px-4 py-2 rounded-xl active:opacity-80"
@@ -307,7 +340,7 @@ export default function ServiceTicketScreen() {
                       </Text>
                     )}
                   </View>
-                  {!isCompleted && (
+                  {!isCompleted && !workdayIsClosed && (
                     <Pressable
                       onPress={() => removeOperationFromCurrentTicket(op.id)}
                       className="w-8 h-8 items-center justify-center active:opacity-60"
@@ -327,7 +360,7 @@ export default function ServiceTicketScreen() {
             <Text className="text-gray-900 text-lg font-bold">
               Rezervni delovi
             </Text>
-            {!isCompleted && (
+            {!isCompleted && !workdayIsClosed && (
               <Pressable
                 onPress={() => setShowSparePartsModal(true)}
                 className="flex-row items-center gap-2 bg-emerald-600 px-4 py-2 rounded-xl active:opacity-80"
@@ -362,7 +395,7 @@ export default function ServiceTicketScreen() {
                       {part.name}
                     </Text>
                   </View>
-                  {!isCompleted && (
+                  {!isCompleted && !workdayIsClosed && (
                     <Pressable
                       onPress={() => removeSparePartFromCurrentTicket(part.id)}
                       className="w-8 h-8 items-center justify-center active:opacity-60"
@@ -412,6 +445,14 @@ export default function ServiceTicketScreen() {
             )
           ) : (
             // Complete button (only if service is in progress)
+            workdayIsClosed ? (
+              <View className="bg-gray-100 rounded-2xl p-6 items-center">
+                <Ionicons name="lock-closed" size={32} color="#9CA3AF" />
+                <Text className="text-gray-500 text-sm mt-2 text-center">
+                  Radni dan je zatvoren. Ne možete završiti servis dok administrator ne otvori novi radni dan.
+                </Text>
+              </View>
+            ) : (
             <>
               <Pressable
                 onPress={handleComplete}
@@ -445,6 +486,7 @@ export default function ServiceTicketScreen() {
                 </Text>
               )}
             </>
+            )
           )}
         </View>
       </ScrollView>

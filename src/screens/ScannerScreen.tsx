@@ -45,6 +45,9 @@ export default function ScannerScreen() {
   const tickets = useServiceStore((s) => s.tickets);
   const user = useAuthStore((s) => s.user);
 
+  // Check if workday is closed
+  const workdayIsClosed = user?.workdayStatus === "closed";
+
   if (!permission) {
     return (
       <View className="flex-1 bg-gray-900 items-center justify-center">
@@ -80,6 +83,16 @@ export default function ScannerScreen() {
   const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {
     // Use ref to prevent race conditions - state updates are async
     if (scanned || processing || isProcessingRef.current) return;
+
+    // Check if workday is closed
+    if (workdayIsClosed) {
+      Alert.alert(
+        "Radni dan je zatvoren",
+        "Ne možete kreirati nove servise jer je radni dan zatvoren. Samo administrator može ponovo otvoriti radni dan.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
 
     // Immediately set ref to prevent duplicate scans
     isProcessingRef.current = true;
@@ -171,6 +184,18 @@ export default function ScannerScreen() {
   };
 
   const createTicketWithCode = (code: string) => {
+    // Check if workday is closed
+    if (workdayIsClosed) {
+      Alert.alert(
+        "Radni dan je zatvoren",
+        "Ne možete kreirati nove servise jer je radni dan zatvoren. Samo administrator može ponovo otvoriti radni dan.",
+        [{ text: "OK" }]
+      );
+      setShowManualEntry(false);
+      setManualCode("");
+      return;
+    }
+
     // Check if there's already an active ticket with this device code
     const existingActiveTicket = tickets.find(
       (t) => t.deviceCode === code && t.status === "in_progress"
