@@ -54,6 +54,11 @@ export default function Navigation() {
           path: "/configuration",
         },
         {
+          label: "Veza sa ERP",
+          path: "/configuration?tab=erp",
+          requiresGospodar: true,
+        },
+        {
           label: "Mobilna aplikacija",
           path: "/mobile-app",
           requiresGospodar: true,

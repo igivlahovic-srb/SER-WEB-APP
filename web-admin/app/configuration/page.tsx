@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { OperationTemplate, SparePartTemplate, User } from "../../types";
 import Navigation from "../../components/Navigation";
 
 export default function ConfigurationPage() {
+  const searchParams = useSearchParams();
   const [operations, setOperations] = useState<OperationTemplate[]>([]);
   const [spareParts, setSpareParts] = useState<SparePartTemplate[]>([]);
   const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "systemSettings" | "deviceTypes">("operations");
@@ -50,6 +52,15 @@ export default function ConfigurationPage() {
     }
     fetchConfigData();
   }, []);
+
+  // Handle URL parameter for tab switching (e.g., ?tab=erp)
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "erp") {
+      setActiveTab("systemSettings");
+      setSystemTab("database");
+    }
+  }, [searchParams]);
 
   // Reset filters when tab changes
   useEffect(() => {
