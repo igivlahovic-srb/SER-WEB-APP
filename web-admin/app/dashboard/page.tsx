@@ -141,8 +141,9 @@ export default function DashboardPage() {
 
             {/* Live Clock */}
             <div className="flex-1 flex justify-center">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl px-6 py-3 text-white shadow-lg">
-                <div className="text-center">
+              <div className="relative bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl px-8 py-4 text-white shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl blur-xl opacity-50"></div>
+                <div className="relative text-center">
                   <p className="text-2xl font-bold font-mono">
                     {currentTime.toLocaleTimeString("sr-RS", {
                       hour: "2-digit",
