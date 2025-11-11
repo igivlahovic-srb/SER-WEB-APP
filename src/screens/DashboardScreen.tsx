@@ -70,12 +70,12 @@ export default function DashboardScreen() {
           style={{ paddingTop: 60, paddingBottom: 32, paddingHorizontal: 24 }}
         >
           <View className="items-center mb-6">
-            {/* La Fantana Logo */}
-            <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-4 p-2">
-              <Image
-                source={require("../../assets/icon.png")}
-                style={{ width: 60, height: 60 }}
-                resizeMode="contain"
+            {/* User Icon */}
+            <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center mb-4">
+              <Ionicons
+                name={isSuperUser ? "shield-checkmark" : "person"}
+                size={32}
+                color="#FFFFFF"
               />
             </View>
             <Text className="text-blue-100 text-sm font-medium mb-1">
