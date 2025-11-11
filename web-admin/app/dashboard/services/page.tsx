@@ -45,6 +45,30 @@ export default function ServicesPage() {
     }
   };
 
+  const handleReopenTicket = async (ticketId: string) => {
+    if (!confirm("Da li ste sigurni da želite ponovo da otvorite ovaj servis?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/sync/tickets/${ticketId}/reopen`, {
+        method: "POST",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Servis je uspešno ponovo otvoren!");
+        setSelectedTicket(null);
+        loadTickets();
+      } else {
+        alert("Greška: " + (data.message || "Nije moguće ponovo otvoriti servis"));
+      }
+    } catch (error) {
+      console.error("Error reopening ticket:", error);
+      alert("Greška pri ponovnom otvaranju servisa");
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem("admin-user");
     router.push("/");
@@ -491,12 +515,22 @@ export default function ServicesPage() {
             </div>
 
             <div className="p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-              <button
-                onClick={() => setSelectedTicket(null)}
-                className="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition-colors"
-              >
-                Zatvori
-              </button>
+              <div className="flex gap-3">
+                {selectedTicket.status === "completed" && (
+                  <button
+                    onClick={() => handleReopenTicket(selectedTicket.id)}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
+                  >
+                    Ponovo otvori servis
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedTicket(null)}
+                  className={`${selectedTicket.status === "completed" ? "flex-1" : "w-full"} bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition-colors`}
+                >
+                  Zatvori
+                </button>
+              </div>
             </div>
           </div>
         </div>
