@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E40AF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#gradient)" rx="180"/>
+
+  <!-- LA FANTANA Text - Larger and White -->
+  <g transform="translate(512, 380)" fill="#FFFFFF">
+    <!-- L -->
+    <path d="M-420,-60 h60 v180 h100 v50 h-160 z"/>
+
+    <!-- A -->
+    <path d="M-310,-60 l-40,120 l-40,-120 h-60 l70,230 h60 l70,-230 z"/>
+
+    <!-- F -->
+    <path d="M-150,-60 h140 v50 h-80 v50 h70 v50 h-70 v80 h-60 z"/>
+
+    <!-- A -->
+    <path d="M40,-60 l-40,120 l-40,-120 h-60 l70,230 h60 l70,-230 z"/>
+
+    <!-- N -->
+    <path d="M150,-60 h60 v180 l80,-180 h60 v230 h-60 v-180 l-80,180 h-60 z"/>
+
+    <!-- T -->
+    <path d="M380,-60 h150 v50 h-45 v180 h-60 v-180 h-45 z"/>
+
+    <!-- A -->
+    <path d="M580,-60 l-40,120 l-40,-120 h-60 l70,230 h60 l70,-230 z"/>
+
+    <!-- N -->
+    <path d="M690,-60 h60 v180 l80,-180 h60 v230 h-60 v-180 l-80,180 h-60 z"/>
+
+    <!-- A -->
+    <path d="M920,-60 l-40,120 l-40,-120 h-60 l70,230 h60 l70,-230 z"/>
+  </g>
+
+  <!-- WHS Subtitle -->
+  <text x="512" y="650" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF" text-anchor="middle">WHS</text>
+</svg>

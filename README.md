@@ -2,6 +2,25 @@
 
 Profesionalna mobilna aplikacija za servisiranje i održavanje water aparata sa bocom od 19L.
 
+## 🎨 Ikone Aplikacije
+
+Aplikacija koristi La Fantana brending sa belim slovima na plavom gradijent pozadini.
+
+### Generisanje ikona
+
+Za generisanje novih ikona sa belim slovima:
+
+1. Otvorite `generate-icons.html` u web browser-u
+2. Kliknite "Generiši Ikone" ili "Preuzmi Sve"
+3. Sačuvajte generisane ikone u `/assets/` folder:
+   - `icon.png` (1024x1024) - Glavna iOS/Android ikona
+   - `adaptive-icon.png` (1024x1024) - Android adaptive ikona
+   - `favicon.png` (48x48) - Web favicon
+4. Ikone će imati:
+   - **Plavi gradijent pozadinu** (#1E40AF → #3B82F6 → #60A5FA)
+   - **Bela slova** "LA FANTANA WHS" sa "SERVISNI MODUL" podnaslovom
+   - **Veća i čitljivija tipografija**
+
 ## 📱 Opis
 
 La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisnim radovima na water aparatima. Aplikacija omogućava serviserima da brzo evidentiraju servise skeniranjem QR kodova, beleženju operacija i utrošenih rezervnih delova, dok super administratori imaju uvid u sve servise i statistiku.

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Fantana Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        canvas {
+            border: 2px solid #ccc;
+            margin: 20px;
+            background: white;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .icon-preview {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>La Fantana WHS - Icon Generator</h1>
+        <div class="info">
+            <h2>Uputstva:</h2>
+            <ol>
+                <li>Kliknite na dugme ispod da generišete ikone</li>
+                <li>Desni klik na svaku ikonu → "Save Image As..."</li>
+                <li>Sačuvajte ikone sa sledećim imenima:
+                    <ul>
+                        <li><strong>icon.png</strong> (1024x1024) - Glavna ikona</li>
+                        <li><strong>adaptive-icon.png</strong> (1024x1024) - Android adaptive ikona</li>
+                        <li><strong>favicon.png</strong> (48x48) - Favicon</li>
+                    </ul>
+                </li>
+                <li>Zameni te fajlove u /assets/ folderu</li>
+            </ol>
+        </div>
+
+        <button onclick="generateIcons()">Generiši Ikone</button>
+        <button onclick="downloadAll()">Preuzmi Sve</button>
+
+        <div id="icons-container"></div>
+    </div>
+
+    <script>
+        function generateIcon(size, canvasId) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            canvas.id = canvasId;
+            const ctx = canvas.getContext('2d');
+
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#1E40AF');
+            gradient.addColorStop(0.5, '#3B82F6');
+            gradient.addColorStop(1, '#60A5FA');
+
+            // Rounded rectangle
+            const cornerRadius = size * 0.18;
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 0, 0, size, size, cornerRadius);
+
+            // White text - LA FANTANA
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Main text
+            ctx.font = `bold ${size * 0.12}px Arial, sans-serif`;
+            ctx.letterSpacing = `${size * 0.01}px`;
+            ctx.fillText('LA FANTANA', size / 2, size * 0.42);
+
+            // WHS subtitle
+            ctx.font = `bold ${size * 0.15}px Arial, sans-serif`;
+            ctx.letterSpacing = `${size * 0.015}px`;
+            ctx.fillText('WHS', size / 2, size * 0.58);
+
+            // Servisni Modul
+            ctx.font = `600 ${size * 0.04}px Arial, sans-serif`;
+            ctx.globalAlpha = 0.9;
+            ctx.fillText('SERVISNI MODUL', size / 2, size * 0.75);
+
+            return canvas;
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function generateIcons() {
+            const container = document.getElementById('icons-container');
+            container.innerHTML = '';
+
+            const sizes = [
+                { size: 1024, name: 'icon.png (1024x1024)', id: 'icon-1024' },
+                { size: 1024, name: 'adaptive-icon.png (1024x1024)', id: 'adaptive-icon' },
+                { size: 192, name: 'notification-icon.png (192x192)', id: 'icon-192' },
+                { size: 48, name: 'favicon.png (48x48)', id: 'favicon' }
+            ];
+
+            sizes.forEach(({ size, name, id }) => {
+                const div = document.createElement('div');
+                div.className = 'icon-preview';
+
+                const canvas = generateIcon(size, id);
+
+                const label = document.createElement('p');
+                label.textContent = name;
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = 'Preuzmi';
+                downloadBtn.onclick = () => downloadCanvas(canvas, name);
+
+                div.appendChild(canvas);
+                div.appendChild(label);
+                div.appendChild(downloadBtn);
+                container.appendChild(div);
+            });
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            const canvases = document.querySelectorAll('canvas');
+            const names = ['icon.png', 'adaptive-icon.png', 'icon-192.png', 'favicon.png'];
+
+            canvases.forEach((canvas, index) => {
+                setTimeout(() => {
+                    downloadCanvas(canvas, names[index]);
+                }, index * 500);
+            });
+        }
+
+        // Generate icons on load
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>
