@@ -20,6 +20,11 @@ export default function BackupPage() {
   const [creatingBackup, setCreatingBackup] = useState(false);
   const [backupSuccess, setBackupSuccess] = useState(false);
   const [backupError, setBackupError] = useState("");
+  const [restoringBackup, setRestoringBackup] = useState(false);
+  const [restoreSuccess, setRestoreSuccess] = useState(false);
+  const [restoreError, setRestoreError] = useState("");
+  const [selectedBackupForRestore, setSelectedBackupForRestore] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Helper funkcija za formatiranje veličine fajla
   const formatFileSize = (bytes: number): string => {
@@ -48,6 +53,7 @@ export default function BackupPage() {
   }, [router]);
 
   const fetchBackups = async () => {
+    setRefreshing(true);
     try {
       const response = await fetch("/api/backup");
       const data = await response.json();
@@ -59,6 +65,7 @@ export default function BackupPage() {
       console.error("Error fetching backups:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -78,7 +85,8 @@ export default function BackupPage() {
         setBackupSuccess(true);
         setTimeout(() => {
           setBackupSuccess(false);
-        }, 5000);
+          fetchBackups(); // Auto refresh after backup
+        }, 3000);
       } else {
         setBackupError(data.message || "Greška pri kreiranju backup-a");
       }
@@ -87,6 +95,41 @@ export default function BackupPage() {
       setBackupError("Greška pri kreiranju backup-a");
     } finally {
       setCreatingBackup(false);
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    if (!selectedBackupForRestore) return;
+
+    setRestoringBackup(true);
+    setRestoreError("");
+    setRestoreSuccess(false);
+
+    try {
+      const response = await fetch("/api/backup/restore", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          backupFile: selectedBackupForRestore,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRestoreSuccess(true);
+        setSelectedBackupForRestore(null);
+        alert("Backup je uspešno restore-ovan! Server će se restartovati za 5 sekundi.");
+      } else {
+        setRestoreError(data.message || "Greška pri restore-ovanju backup-a");
+      }
+    } catch (error) {
+      console.error("Error restoring backup:", error);
+      setRestoreError("Greška pri restore-ovanju backup-a");
+    } finally {
+      setRestoringBackup(false);
     }
   };
 
@@ -263,10 +306,11 @@ export default function BackupPage() {
             </h2>
             <button
               onClick={fetchBackups}
-              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-2"
+              disabled={refreshing}
+              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:text-gray-400 font-medium transition-colors flex items-center gap-2"
             >
               <svg
-                className="w-4 h-4"
+                className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -278,7 +322,7 @@ export default function BackupPage() {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              Refresh
+              {refreshing ? "Učitavanje..." : "Refresh"}
             </button>
           </div>
 
@@ -325,7 +369,7 @@ export default function BackupPage() {
                         Naziv fajla
                       </th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
-                        Download
+                        Akcije
                       </th>
                     </tr>
                   </thead>
@@ -363,26 +407,47 @@ export default function BackupPage() {
                           </span>
                         </td>
                         <td className="py-4 px-4 text-right">
-                          <a
-                            href={backup.downloadUrl}
-                            download
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          <div className="flex items-center justify-end gap-2">
+                            <a
+                              href={backup.downloadUrl}
+                              download
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                            Preuzmi
-                          </a>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                              </svg>
+                              Preuzmi
+                            </a>
+                            <button
+                              onClick={() => setSelectedBackupForRestore(backup.name)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                />
+                              </svg>
+                              Restore
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -419,23 +484,121 @@ export default function BackupPage() {
                 Kako restore-ovati backup:
               </p>
               <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
-                <li>Preuzmite backup (.tar.gz fajl) sa linka iznad</li>
-                <li>
-                  Unutar backup arhive se nalazi RESTORE_GUIDE.txt sa detaljnim
-                  uputstvima
-                </li>
+                <li>Kliknite dugme &quot;Restore&quot; pored backup-a koji želite da vratite</li>
+                <li>Sistem će automatski izvršiti restore kompletne instalacije</li>
+                <li>Server će se restartovati nakon uspešnog restore-a</li>
                 <li>
                   Backup sadrži kompletnu instalaciju: mobilnu aplikaciju, web
                   portal i APK fajlove
                 </li>
                 <li>
-                  Za brzi restore, pogledajte RESTORE_GUIDE.txt fajl u arhivi
+                  Za manuelni restore, preuzmite backup i pogledajte RESTORE_GUIDE.txt fajl u arhivi
                 </li>
               </ul>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Restore Confirmation Modal */}
+      {selectedBackupForRestore && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-orange-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Restore Backup-a
+              </h3>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-700 mb-2">
+                Da li ste sigurni da želite da vratite sistem na ovaj backup?
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 mt-3">
+                <p className="text-sm font-mono text-gray-600">
+                  {selectedBackupForRestore}
+                </p>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                <p className="text-sm text-red-800 font-semibold mb-1">
+                  ⚠️ Upozorenje:
+                </p>
+                <ul className="text-xs text-red-700 space-y-1 list-disc list-inside">
+                  <li>Svi trenutni podaci će biti zamenjeni sa backup podacima</li>
+                  <li>Server će se automatski restartovati</li>
+                  <li>Ova akcija se ne može poništiti</li>
+                </ul>
+              </div>
+
+              {restoreError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+                  <p className="text-sm text-red-800">{restoreError}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleRestoreBackup}
+                disabled={restoringBackup}
+                className="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                {restoringBackup ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Restore u toku...
+                  </>
+                ) : (
+                  "Potvrdi Restore"
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedBackupForRestore(null);
+                  setRestoreError("");
+                }}
+                disabled={restoringBackup}
+                className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 rounded-lg font-semibold transition-colors"
+              >
+                Otkaži
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
