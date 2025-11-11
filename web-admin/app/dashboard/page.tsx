@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [tickets, setTickets] = useState<ServiceTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const router = useRouter();
 
   useEffect(() => {
@@ -31,6 +32,15 @@ export default function DashboardPage() {
     setUser(parsedUser);
     loadData();
   }, [router]);
+
+  useEffect(() => {
+    // Update time every second
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -126,6 +136,29 @@ export default function DashboardPage() {
                   La Fantana WHS Admin
                 </h1>
                 <p className="text-sm text-gray-600">Kontrolna tabla</p>
+              </div>
+            </div>
+
+            {/* Live Clock */}
+            <div className="flex-1 flex justify-center">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl px-6 py-3 text-white shadow-lg">
+                <div className="text-center">
+                  <p className="text-2xl font-bold font-mono">
+                    {currentTime.toLocaleTimeString("sr-RS", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
+                  </p>
+                  <p className="text-xs opacity-90 mt-1">
+                    {currentTime.toLocaleDateString("sr-RS", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
               </div>
             </div>
 
