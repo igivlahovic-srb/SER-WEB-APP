@@ -105,6 +105,7 @@ La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisni
 ## 🎨 Dizajn
 
 ### Dizajnerske teme
+- **Brending**: La Fantana logo i ikone uniformne sa web admin panelom
 - **Profesionalna paleta boja**:
   - Primarno: Plava (#1E40AF, #3B82F6) - poverenje i profesionalizam
   - Sekundarno: Zelena (#10B981) - uspeh i završetak
