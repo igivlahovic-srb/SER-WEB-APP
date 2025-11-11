@@ -8,49 +8,95 @@ interface MenuItem {
   path?: string;
   icon?: JSX.Element;
   children?: MenuItem[];
+  requiresGospodar?: boolean;
 }
-
-const menuItems: MenuItem[] = [
-  {
-    label: "Početna",
-    path: "/dashboard",
-  },
-  {
-    label: "Korisnici",
-    path: "/dashboard/users",
-  },
-  {
-    label: "Servisi",
-    path: "/dashboard/services",
-  },
-  {
-    label: "Radni dani",
-    path: "/workday",
-  },
-  {
-    label: "Konfiguracija",
-    path: "/configuration",
-  },
-  {
-    label: "Sistemska podešavanja",
-    children: [
-      {
-        label: "Mobilna aplikacija",
-        path: "/mobile-app",
-      },
-      {
-        label: "Backup",
-        path: "/backup",
-      },
-    ],
-  },
-];
 
 export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Get user role from sessionStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userData = sessionStorage.getItem("admin-user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUserRole(user.role);
+      }
+    }
+  }, []);
+
+  const menuItems: MenuItem[] = [
+    {
+      label: "Početna",
+      path: "/dashboard",
+    },
+    {
+      label: "Korisnici",
+      path: "/dashboard/users",
+    },
+    {
+      label: "Servisi",
+      path: "/dashboard/services",
+    },
+    {
+      label: "Radni dani",
+      path: "/workday",
+    },
+    {
+      label: "Konfiguracija",
+      children: [
+        {
+          label: "Operacije i Delovi",
+          path: "/configuration",
+        },
+        {
+          label: "Mobilna aplikacija",
+          path: "/mobile-app",
+          requiresGospodar: true,
+        },
+        {
+          label: "Backup",
+          path: "/backup",
+          requiresGospodar: true,
+        },
+      ],
+    },
+  ];
+
+  // Filter menu items based on user role
+  const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+    return items
+      .map((item) => {
+        if (item.children) {
+          const filteredChildren = item.children.filter((child) => {
+            if (child.requiresGospodar) {
+              return userRole === "gospodar";
+            }
+            return true;
+          });
+
+          // If all children are filtered out, don't show the parent
+          if (filteredChildren.length === 0) {
+            return null;
+          }
+
+          return { ...item, children: filteredChildren };
+        }
+
+        if (item.requiresGospodar) {
+          return userRole === "gospodar" ? item : null;
+        }
+
+        return item;
+      })
+      .filter(Boolean) as MenuItem[];
+  };
+
+  const visibleMenuItems = filterMenuItems(menuItems);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -87,7 +133,7 @@ export default function Navigation() {
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex gap-8" ref={dropdownRef}>
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive = isItemActive(item);
             const isOpen = openDropdown === item.label;
 
