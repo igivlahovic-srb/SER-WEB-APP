@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -70,11 +70,12 @@ export default function DashboardScreen() {
           style={{ paddingTop: 60, paddingBottom: 32, paddingHorizontal: 24 }}
         >
           <View className="items-center mb-6">
-            <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center mb-4">
-              <Ionicons
-                name={isSuperUser ? "shield-checkmark" : "person"}
-                size={32}
-                color="#FFFFFF"
+            {/* La Fantana Logo */}
+            <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-4 p-2">
+              <Image
+                source={require("../../assets/logo.png")}
+                style={{ width: 60, height: 60 }}
+                resizeMode="contain"
               />
             </View>
             <Text className="text-blue-100 text-sm font-medium mb-1">

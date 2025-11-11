@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Keyboard,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -121,8 +122,14 @@ export default function LoginScreen() {
             className="flex-1"
           >
             <View className="flex-1 justify-center px-6">
-              {/* Logo/Title Section - Updated v2.1.0 with white text */}
+              {/* Logo/Title Section */}
               <View className="items-center mb-12">
+                {/* La Fantana Logo */}
+                <Image
+                  source={require("../../assets/logo.png")}
+                  style={{ width: 120, height: 120, marginBottom: 16 }}
+                  resizeMode="contain"
+                />
                 <Text className="text-white text-5xl font-extrabold tracking-tight mb-2">
                   LA FANTANA
                 </Text>
