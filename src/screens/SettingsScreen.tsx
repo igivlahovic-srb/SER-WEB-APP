@@ -132,7 +132,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleRefreshSpareParts = async () => {
+  const handleRefreshConfig = async () => {
     if (refreshingConfig) return;
 
     setRefreshingConfig(true);
@@ -155,16 +155,16 @@ export default function SettingsScreen() {
       if (success) {
         Alert.alert(
           "Uspeh",
-          "Rezervni delovi su uspešno ažurirani sa web panela! ✅"
+          "Operacije i rezervni delovi su uspešno ažurirani sa web panela! ✅"
         );
       } else {
         Alert.alert(
           "Greška",
-          "Nije moguće učitati rezervne delove sa web panela"
+          "Nije moguće učitati operacije i rezervne delove sa web panela"
         );
       }
     } catch (error) {
-      Alert.alert("Greška", "Došlo je do greške pri ažuriranju rezervnih delova");
+      Alert.alert("Greška", "Došlo je do greške pri ažuriranju konfiguracije");
       console.error(error);
     } finally {
       setRefreshingConfig(false);
@@ -244,11 +244,11 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          {/* Spare Parts Refresh */}
+          {/* Configuration Refresh */}
           <View className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-gray-900 text-xl font-bold">
-                Rezervni delovi
+                Operacije i rezervni delovi
               </Text>
               <Ionicons name="build-outline" size={32} color="#10B981" />
             </View>
@@ -265,11 +265,11 @@ export default function SettingsScreen() {
             )}
 
             <Text className="text-gray-600 text-sm mb-4">
-              Ažurirajte listu rezervnih delova i operacija sa web admin panela
+              Ažurirajte listu operacija i rezervnih delova sa web admin panela
             </Text>
 
             <Pressable
-              onPress={handleRefreshSpareParts}
+              onPress={handleRefreshConfig}
               disabled={refreshingConfig || testing || isSyncing}
               className={`rounded-2xl px-6 py-4 flex-row items-center justify-center ${
                 refreshingConfig || testing || isSyncing ? "bg-gray-300" : "bg-emerald-600"
@@ -286,7 +286,7 @@ export default function SettingsScreen() {
                 <>
                   <Ionicons name="refresh" size={20} color="#FFFFFF" />
                   <Text className="text-white text-base font-bold ml-2">
-                    Osveži rezervne delove
+                    Osveži operacije i delove
                   </Text>
                 </>
               )}
