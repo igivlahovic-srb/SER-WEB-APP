@@ -49,8 +49,12 @@ export default function DashboardScreen() {
   }, {} as Record<string, { total: number; completed: number; inProgress: number }>);
 
   const isSuperUser = user?.role === "super_user";
+  const workdayIsClosed = user?.workdayStatus === "closed";
 
   const handleStartService = () => {
+    if (workdayIsClosed) {
+      return; // Do nothing if workday is closed
+    }
     navigation.navigate("Scanner");
   };
 
@@ -88,18 +92,30 @@ export default function DashboardScreen() {
           {!isSuperUser && (
             <Pressable
               onPress={handleStartService}
+              disabled={workdayIsClosed}
               className="active:opacity-80"
             >
-              <View className="bg-white rounded-2xl p-4 flex-row items-center justify-between shadow-lg">
+              <View className={`rounded-2xl p-4 flex-row items-center justify-between shadow-lg ${
+                workdayIsClosed ? "bg-gray-300" : "bg-white"
+              }`}>
                 <View className="flex-1">
-                  <Text className="text-gray-900 text-lg font-bold mb-1">
+                  <Text className={`text-lg font-bold mb-1 ${
+                    workdayIsClosed ? "text-gray-600" : "text-gray-900"
+                  }`}>
                     Novi servis
                   </Text>
-                  <Text className="text-gray-600 text-sm">
-                    Skeniraj QR kod water aparata
+                  <Text className={`text-sm ${
+                    workdayIsClosed ? "text-gray-500" : "text-gray-600"
+                  }`}>
+                    {workdayIsClosed
+                      ? "Radni dan je zatvoren"
+                      : "Skeniraj QR kod water aparata"
+                    }
                   </Text>
                 </View>
-                <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center">
+                <View className={`w-12 h-12 rounded-full items-center justify-center ${
+                  workdayIsClosed ? "bg-gray-500" : "bg-blue-600"
+                }`}>
                   <Ionicons name="qr-code" size={24} color="#FFFFFF" />
                 </View>
               </View>
