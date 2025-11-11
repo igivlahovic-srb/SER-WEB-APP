@@ -13,3 +13,4 @@ Using `outputFileTracingRoot` value: /home/user/workspace/.
  ○ Compiling /api/system/info ...
  ✓ Compiled /api/system/info in 1788ms (296 modules)
  GET /api/system/info 200 in 2054ms
+ GET /api/system/info 200 in 90ms
