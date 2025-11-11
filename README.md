@@ -55,6 +55,16 @@ Za generisanje novih ikona sa belim slovima:
   - Notifikacija korisnicima kada je dostupna nova verzija
   - **Workflow:** Promeniš kod → Commit → Čekaš 5-10min → Refresh portal → Preuzmeš APK! 🎉
   - Detalji: `AUTO_BUILD_GUIDE.md`
+- **💾 Backup Sistem** 🗄️
+  - **Kompletna arhiva celog projekta!** Mobilna app, web portal, APK fajlovi
+  - Novi "Backup" tab u web admin panelu
+  - Kreiranje backup-a sa jednim klikom
+  - Prikaz poslednja 3 backup-a u tabeli
+  - Download linkovi za svaki backup (tar.gz format)
+  - Automatsko brisanje starijih backup-ova (čuva samo 3 najnovija)
+  - Sadrži: mobilna aplikacija source, web portal source, APK fajlovi, env fajlovi
+  - RESTORE_GUIDE.txt uključen u svaki backup
+  - Backup proces traje 1-2 minuta
 - **Icon Generator Tool**: HTML generator za kreiranje ikona sa custom tipografijom (`generate-icons.html`)
 - **Web Admin - Mobilna Aplikacija**: Novi tab u web admin panelu za upravljanje Android APK fajlovima
   - Upload/download Android APK
@@ -66,7 +76,10 @@ Za generisanje novih ikona sa belim slovima:
 ### 📚 Dokumentacija
 - `AUTO_BUILD_GUIDE.md`: **NOVO!** Kompletan guide za automatski build sistem
 - `AUTO_UPDATE_ERROR_FIX.md`: **NOVO!** Objašnjenje network error-a u development mode-u
+- `BACKUP_SYSTEM_GUIDE.md`: **NOVO!** Kompletan guide za backup i restore sistem
 - `ANDROID_BUILD_GUIDE.md`: Manualni Android APK build guide
+- `CREATE_BACKUP.sh`: **NOVO!** Script za kreiranje kompletnog backup-a projekta
+- `DEPLOY_BACKUP_SYSTEM.sh`: **NOVO!** Script za deploy backup sistema na server
 - `QUICK_START_DOWNLOAD_LINKS.md`: Quick reference za prikaz download linkova
 - `BIDIRECTIONAL_SYNC_GUIDE.md`: Detaljno objašnjenje bidirekcione sinhronizacije
 - `ICON_GENERATOR_INSTRUCTIONS.md`: Uputstvo za generisanje ikona
@@ -387,6 +400,13 @@ Instalacioni script automatski instalira Node.js, Bun, sve pakete, pravi build, 
   - Download link za servisere da preuzmu aplikaciju
   - Automatsko prepoznavanje verzije iz imena fajla
   - Jednostavno ažuriranje aplikacije za sve servisere
+- **💾 Backup**:
+  - Kreiranje kompletnog backup-a projekta (mobilna app, web portal, APK)
+  - Prikaz poslednja 3 backup-a sa verzijama, datumima i veličinama
+  - Download linkovi za svaki backup u tar.gz formatu
+  - Automatsko čuvanje samo 3 najnovija backup-a
+  - Backup proces traje 1-2 minuta
+  - Sadrži RESTORE_GUIDE.txt sa detaljnim uputstvima
 
 ### Upravljanje Android aplikacijom
 
