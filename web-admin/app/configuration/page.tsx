@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { OperationTemplate, SparePartTemplate, User } from "../../types";
 import Navigation from "../../components/Navigation";
 
-function ConfigurationContent() {
-  const searchParams = useSearchParams();
+export default function ConfigurationPage() {
   const [operations, setOperations] = useState<OperationTemplate[]>([]);
   const [spareParts, setSpareParts] = useState<SparePartTemplate[]>([]);
   const [activeTab, setActiveTab] = useState<"operations" | "spareParts" | "systemSettings" | "deviceTypes">("operations");
@@ -55,12 +53,15 @@ function ConfigurationContent() {
 
   // Handle URL parameter for tab switching (e.g., ?tab=erp)
   useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab === "erp") {
-      setActiveTab("systemSettings");
-      setSystemTab("database");
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tab = urlParams.get("tab");
+      if (tab === "erp") {
+        setActiveTab("systemSettings");
+        setSystemTab("database");
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   // Reset filters when tab changes
   useEffect(() => {
@@ -1687,14 +1688,6 @@ function UbuntuSystemTab() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ConfigurationPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Učitavanje...</div></div>}>
-      <ConfigurationContent />
-    </Suspense>
   );
 }
 
