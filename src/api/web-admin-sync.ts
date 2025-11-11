@@ -263,6 +263,113 @@ class WebAdminAPI {
       };
     }
   }
+
+  // Get available backups from web admin
+  async getBackups(): Promise<SyncResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/api/backup/list`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching backups:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  // Create new backup
+  async createBackup(): Promise<SyncResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/api/backup/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  // Restore from backup
+  async restoreBackup(backupFilename: string): Promise<SyncResponse> {
+    try {
+      const response = await fetch(`${this.apiUrl}/api/backup/restore`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filename: backupFilename }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error restoring backup:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  // Fetch all data from web admin (for live updates)
+  async fetchAllData(): Promise<SyncResponse> {
+    try {
+      const [usersRes, ticketsRes] = await Promise.all([
+        this.fetchUsers(),
+        this.fetchTickets(),
+      ]);
+
+      if (!usersRes.success || !ticketsRes.success) {
+        return {
+          success: false,
+          message: 'Failed to fetch all data',
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          users: usersRes.data,
+          tickets: ticketsRes.data,
+        },
+      };
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }
 
 // Singleton instance
