@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -34,6 +35,8 @@ export default function ScannerScreen() {
   const [processing, setProcessing] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualCode, setManualCode] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [scannedDeviceCode, setScannedDeviceCode] = useState("");
   const navigation = useNavigation<NavigationProp>();
   const isProcessingRef = useRef(false);
 
@@ -100,11 +103,22 @@ export default function ScannerScreen() {
       return;
     }
 
+    // Show confirmation modal
+    setScannedDeviceCode(data);
+    setShowConfirmModal(true);
+    setProcessing(false);
+  };
+
+  const toggleCameraFacing = () => {
+    setFacing((current) => (current === "back" ? "front" : "back"));
+  };
+
+  const handleConfirmStartService = () => {
     // Create new service ticket with unique ID
     const newTicket: ServiceTicket = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       serviceNumber: generateServiceNumber(),
-      deviceCode: data,
+      deviceCode: scannedDeviceCode,
       technicianId: user?.id || "",
       technicianName: user?.name || "",
       startTime: new Date(),
@@ -116,17 +130,16 @@ export default function ScannerScreen() {
     addTicket(newTicket);
     setCurrentTicket(newTicket);
 
-    // Replace scanner with service ticket screen
-    setTimeout(() => {
-      setProcessing(false);
-      setScanned(false);
-      isProcessingRef.current = false;
-      navigation.replace("ServiceTicket");
-    }, 500);
+    setShowConfirmModal(false);
+    isProcessingRef.current = false;
+    navigation.replace("ServiceTicket");
   };
 
-  const toggleCameraFacing = () => {
-    setFacing((current) => (current === "back" ? "front" : "back"));
+  const handleCancelConfirm = () => {
+    setShowConfirmModal(false);
+    setScannedDeviceCode("");
+    setScanned(false);
+    isProcessingRef.current = false;
   };
 
   // Generate next service number in format {CharismaId}_1001, {CharismaId}_1002, etc.
@@ -395,6 +408,63 @@ export default function ScannerScreen() {
             </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
+      </Modal>
+
+      {/* Confirm Start Service Modal */}
+      <Modal
+        visible={showConfirmModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={handleCancelConfirm}
+      >
+        <View className="flex-1 bg-black/60 items-center justify-center px-6">
+          <View className="bg-white rounded-3xl w-full max-w-md overflow-hidden">
+            {/* Icon */}
+            <View className="items-center pt-8 pb-4">
+              <View className="w-20 h-20 bg-blue-100 rounded-full items-center justify-center">
+                <Ionicons name="checkmark-circle" size={48} color="#3B82F6" />
+              </View>
+            </View>
+
+            {/* Content */}
+            <View className="px-6 pb-6">
+              <Text className="text-gray-900 text-2xl font-bold text-center mb-3">
+                Uređaj skeniran
+              </Text>
+              <Text className="text-gray-600 text-base text-center mb-2">
+                Da li želite da započnete servisiranje?
+              </Text>
+              <View className="bg-gray-50 rounded-xl px-4 py-3 mt-4 mb-6">
+                <Text className="text-gray-500 text-xs font-semibold mb-1">
+                  Šifra uređaja
+                </Text>
+                <Text className="text-gray-900 text-lg font-mono">
+                  {scannedDeviceCode}
+                </Text>
+              </View>
+
+              {/* Actions */}
+              <View className="gap-3">
+                <Pressable
+                  onPress={handleConfirmStartService}
+                  className="bg-blue-600 rounded-2xl px-6 py-4 active:opacity-80"
+                >
+                  <Text className="text-white text-base font-bold text-center">
+                    Započni servis
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleCancelConfirm}
+                  className="bg-gray-100 rounded-2xl px-6 py-4 active:opacity-70"
+                >
+                  <Text className="text-gray-700 text-base font-semibold text-center">
+                    Odustani
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </View>
       </Modal>
     </View>
   );
