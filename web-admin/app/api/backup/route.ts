@@ -5,17 +5,31 @@ import path from "path";
 // API endpoint za dobavljanje liste backup-ova
 export async function GET(request: NextRequest) {
   try {
-    const backupDir = path.join(process.cwd(), "public", "backups");
+    // Try multiple backup locations
+    const possibleBackupDirs = [
+      "/root/webadminportal/backups",
+      "/root/webadminportal",
+      path.join(process.cwd(), "public", "backups"),
+      path.join(process.cwd(), "..", "backups"),
+    ];
 
-    // Kreiraj direktorijum ako ne postoji
-    if (!fs.existsSync(backupDir)) {
-      fs.mkdirSync(backupDir, { recursive: true });
+    let backupDir = "";
+    let files: string[] = [];
+
+    // Find the directory that contains backup files
+    for (const dir of possibleBackupDirs) {
+      if (fs.existsSync(dir)) {
+        const dirFiles = fs
+          .readdirSync(dir)
+          .filter((file) => file.endsWith(".tar.gz") && file.startsWith("lafantana-whs-backup-"));
+
+        if (dirFiles.length > 0) {
+          backupDir = dir;
+          files = dirFiles;
+          break;
+        }
+      }
     }
-
-    // Pronađi sve backup fajlove
-    const files = fs
-      .readdirSync(backupDir)
-      .filter((file) => file.endsWith(".tar.gz") && file.startsWith("lafantana-whs-backup-"));
 
     let backups: Array<{
       name: string;
@@ -56,7 +70,7 @@ export async function GET(request: NextRequest) {
             timestamp: `${dateStr}-${timeStr}`,
             size: stats.size,
             date: formattedDate,
-            downloadUrl: `/backups/${file}`,
+            downloadUrl: `/api/backup/download?file=${encodeURIComponent(file)}`,
             time: stats.mtime.getTime(),
           };
         })
@@ -71,6 +85,7 @@ export async function GET(request: NextRequest) {
       data: {
         backups: backups,
         hasBackups: backups.length > 0,
+        backupDir: backupDir, // Debug info
       },
     });
   } catch (error) {
