@@ -1406,18 +1406,30 @@ function UbuntuSystemTab() {
   const [systemInfo, setSystemInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     fetchSystemInfo();
+
+    // Update time every second
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const fetchSystemInfo = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/system/info", {
+      // Add timestamp to prevent any caching
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/system/info?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       const data = await response.json();
@@ -1482,6 +1494,22 @@ function UbuntuSystemTab() {
 
   return (
     <div className="space-y-6">
+      {/* Live Clock */}
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg rounded-lg p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium opacity-90">Trenutno Vreme Servera</p>
+            <p className="text-3xl font-bold mt-1 font-mono">
+              {currentTime.toLocaleTimeString('sr-RS', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
+            <p className="text-sm opacity-75 mt-1">
+              {currentTime.toLocaleDateString('sr-RS', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+          <div className="text-5xl">🕐</div>
+        </div>
+      </div>
+
       {/* Debug Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-xs font-mono text-yellow-900">
