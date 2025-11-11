@@ -45,23 +45,28 @@ Za generisanje novih ikona sa belim slovima:
   - `syncFromWeb()` - Preuzimanje servisa sa portala
   - `bidirectionalSync()` - Puna sinhronizacija (preuzimanje + slanje)
   - Detalji: `BIDIRECTIONAL_SYNC_GUIDE.md`
-- **Android APK Build i Auto-Update Sistem** 🚀
-  - Potpuno automatizovan build system na Ubuntu serveru
-  - Build script (`BUILD_ANDROID_APK.sh`) za kreiranje APK fajlova
-  - Automatski upload APK na web portal
-  - Auto-update provera pri pokretanju aplikacije
+- **🤖 Automatski Android APK Build Sistem** 🚀
+  - **AUTOMATSKI build nakon svake promene!** Git post-commit hook
+  - Build radi u pozadini - ne blokira tvoj rad
+  - Real-time status indikator na web portalu (žuti banner kada je build u toku)
+  - Auto-refresh web stranice svaka 30 sekundi tokom build-a
+  - Istorija build-ova - prikazuje poslednja 3 build-a sa datumima i veličinama
+  - Auto-update provera u mobilnoj aplikaciji
   - Notifikacija korisnicima kada je dostupna nova verzija
-  - Download link direktno iz aplikacije
-  - Detalji: `ANDROID_BUILD_GUIDE.md`
+  - **Workflow:** Promeniš kod → Commit → Čekaš 5-10min → Refresh portal → Preuzmeš APK! 🎉
+  - Detalji: `AUTO_BUILD_GUIDE.md`
 - **Icon Generator Tool**: HTML generator za kreiranje ikona sa custom tipografijom (`generate-icons.html`)
 - **Web Admin - Mobilna Aplikacija**: Novi tab u web admin panelu za upravljanje Android APK fajlovima
   - Upload/download Android APK
   - Verzionisanje aplikacije
+  - Prikaz poslednja 3 build-a u tabeli
+  - Real-time build status sa spinner-om
   - Link za manual download
-  - Prikaz trenutne verzije i veličine APK fajla
 
 ### 📚 Dokumentacija
-- `ANDROID_BUILD_GUIDE.md`: Kompletan vodič za Android APK build i auto-update sistem
+- `AUTO_BUILD_GUIDE.md`: **NOVO!** Kompletan guide za automatski build sistem
+- `ANDROID_BUILD_GUIDE.md`: Manualni Android APK build guide
+- `QUICK_START_DOWNLOAD_LINKS.md`: Quick reference za prikaz download linkova
 - `BIDIRECTIONAL_SYNC_GUIDE.md`: Detaljno objašnjenje bidirekcione sinhronizacije
 - `ICON_GENERATOR_INSTRUCTIONS.md`: Uputstvo za generisanje ikona
 - `LOGIN_LOGO_GUIDE.md`: Uputstvo za login screen logo

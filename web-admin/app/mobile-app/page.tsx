@@ -26,6 +26,7 @@ export default function MobileAppPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [buildInProgress, setBuildInProgress] = useState(false);
 
   // Helper funkcija za formatiranje veličine fajla
   const formatFileSize = (bytes: number): string => {
@@ -72,12 +73,31 @@ export default function MobileAppPage() {
       if (data.success) {
         setAppInfo(data.data);
       }
+
+      // Also check build status
+      const statusResponse = await fetch("/api/mobile-app/build-status");
+      const statusData = await statusResponse.json();
+
+      if (statusData.success) {
+        setBuildInProgress(statusData.data.buildInProgress);
+      }
     } catch (error) {
       console.error("Error fetching app info:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Auto-refresh kada je build u toku
+  useEffect(() => {
+    if (!buildInProgress) return;
+
+    const interval = setInterval(() => {
+      fetchAppInfo();
+    }, 30000); // Proveri svaka 30 sekundi
+
+    return () => clearInterval(interval);
+  }, [buildInProgress]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -156,6 +176,37 @@ export default function MobileAppPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Build In Progress Banner */}
+        {buildInProgress && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mb-6">
+            <div className="flex items-start gap-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-600"></div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-yellow-900 mb-2">
+                  Android Build u toku...
+                </h3>
+                <p className="text-yellow-800 mb-3">
+                  Automatski build proces je pokrenut nakon vaših promena na mobilnoj aplikaciji.
+                  Build traje 5-10 minuta.
+                </p>
+                <div className="bg-yellow-100 rounded-lg p-3 text-sm text-yellow-800">
+                  <p className="font-semibold mb-1">Šta se dešava:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Instaliranje dependencies...</li>
+                    <li>Build-ovanje Android APK sa EAS Build...</li>
+                    <li>Upload na web portal...</li>
+                  </ul>
+                  <p className="mt-3 font-semibold">
+                    ⏱️ Stranica će se automatski refresh-ovati svaka 30 sekundi.
+                    <br />
+                    Ili ručno refresh-ujte stranicu (F5) da vidite novi APK kada build završi!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Current Version Info */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
