@@ -102,6 +102,53 @@ bun run build
 bun start
 ```
 
+## 🔄 Ažuriranje i Održavanje
+
+### Automatski Update Script (Preporučeno)
+
+Koristite **UPDATE.sh** - univerzalni script koji automatski detektuje bun ili npm:
+
+```bash
+cd ~/webadminportal/web-admin
+chmod +x UPDATE.sh
+./UPDATE.sh
+```
+
+**Šta UPDATE.sh radi:**
+- ✅ Automatski detektuje da li koristite bun ili npm
+- ✅ Stopira postojeće procese
+- ✅ Čisti cache
+- ✅ Instalira dependencies
+- ✅ Build-uje aplikaciju
+- ✅ Pokreće sa PM2
+- ✅ Testira da server radi
+
+### Drugi Načini Ažuriranja
+
+**Ako bun NIJE instaliran:**
+```bash
+./QUICK_FIX_NPM.sh    # Koristi npm umesto bun-a
+```
+
+**Kompletan rebuild:**
+```bash
+./REBUILD.sh          # Za dublje probleme
+```
+
+**Manuelni način:**
+```bash
+pm2 stop lafantana-whs-admin
+rm -rf .next node_modules/.cache
+npm install          # ili: bun install
+npm run build        # ili: bun run build
+pm2 restart lafantana-whs-admin
+```
+
+### Troubleshooting Dokumenata
+
+- **BUN_NOT_FOUND.md** - Rešenje za "bun not found" grešku
+- **BUN_INSTALL_ERROR.md** - Rešenje za "bun install" greške
+
 ## 🔄 Sinhronizacija sa mobilnom aplikacijom
 
 ### ⚠️ VAŽNO: Ne koristite localhost!
