@@ -3,10 +3,10 @@ import dataStore from "../../../../../../lib/dataStore";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ticketId = params.id;
+    const { id: ticketId } = await params;
     const tickets = dataStore.getTickets();
 
     const ticketIndex = tickets.findIndex((t) => t.id === ticketId);
@@ -37,7 +37,7 @@ export async function POST(
     };
 
     tickets[ticketIndex] = updatedTicket;
-    dataStore.saveTickets(tickets);
+    dataStore.setTickets(tickets);
 
     return NextResponse.json({
       success: true,
