@@ -9,13 +9,13 @@ import {
   ActivityIndicator,
   Keyboard,
   Alert,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
 import * as Application from "expo-application";
-import LaFantanaLogoWhite from "../components/LaFantanaLogoWhite";
 
 // Conditionally import expo-updates only if available
 let Updates: any = null;
@@ -124,8 +124,18 @@ export default function LoginScreen() {
             <View className="flex-1 justify-center px-6">
               {/* Logo/Title Section */}
               <View className="items-center mb-12">
-                {/* La Fantana Logo with White Text */}
-                <LaFantanaLogoWhite width={200} height={200} />
+                {/* La Fantana Logo */}
+                <Image
+                  source={require("../../assets/icon.png")}
+                  style={{ width: 120, height: 120, marginBottom: 16 }}
+                  resizeMode="contain"
+                />
+                <Text className="text-white text-5xl font-extrabold tracking-tight mb-2">
+                  LA FANTANA
+                </Text>
+                <Text className="text-white text-4xl font-bold mb-3">
+                  WHS
+                </Text>
                 <Text className="text-blue-100 text-lg text-center font-medium">
                   Servisni Modul
                 </Text>

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -10,7 +10,6 @@ import { useAuthStore } from "../state/authStore";
 import { useServiceStore } from "../state/serviceStore";
 import { format } from "date-fns";
 import ConnectionIndicator from "../components/ConnectionIndicator";
-import LaFantanaLogoWhite from "../components/LaFantanaLogoWhite";
 
 type DashboardNavigationProp = BottomTabNavigationProp<MainTabParamList, "Dashboard"> &
   NativeStackNavigationProp<RootStackParamList>;
@@ -71,9 +70,13 @@ export default function DashboardScreen() {
           style={{ paddingTop: 60, paddingBottom: 32, paddingHorizontal: 24 }}
         >
           <View className="items-center mb-6">
-            {/* La Fantana Logo with White Text */}
-            <View className="mb-4">
-              <LaFantanaLogoWhite width={80} height={80} />
+            {/* La Fantana Logo */}
+            <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-4 p-2">
+              <Image
+                source={require("../../assets/icon.png")}
+                style={{ width: 60, height: 60 }}
+                resizeMode="contain"
+              />
             </View>
             <Text className="text-blue-100 text-sm font-medium mb-1">
               Dobrodošli nazad
