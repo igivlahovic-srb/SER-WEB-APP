@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   return NextResponse.json({
-    status: 'ok',
-    message: 'Web Admin Portal API is running',
-    timestamp: new Date().toISOString()
+    success: true,
+    message: "Web Admin Panel API is running",
+    timestamp: new Date().toISOString(),
   });
 }

@@ -1,86 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON } from '../../lib/storage';
+import { NextRequest, NextResponse } from "next/server";
+import { dataStore } from "../../../../lib/dataStore";
 
-// GET - Fetch all users
-export async function GET() {
+export async function POST(req: NextRequest) {
   try {
-    const data = await readJSON('users.json');
+    const body = await req.json();
+    const { users } = body;
 
-    if (!data) {
+    if (!users || !Array.isArray(users)) {
       return NextResponse.json(
-        { success: false, message: 'Failed to read users data' },
-        { status: 500 }
+        { success: false, message: "Invalid users data" },
+        { status: 400 }
       );
     }
 
+    dataStore.setUsers(users);
+
     return NextResponse.json({
       success: true,
-      users: data.users || []
+      message: "Users synced successfully",
+      data: { count: users.length },
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error syncing users:", error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: "Failed to sync users" },
       { status: 500 }
     );
   }
 }
 
-// POST - Sync users from mobile app
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    const body = await request.json();
-    const { users } = body;
-
-    if (!users || !Array.isArray(users)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid users data' },
-        { status: 400 }
-      );
-    }
-
-    // Read existing data
-    const existingData = await readJSON('users.json') || { users: [] };
-
-    // Merge users - use incoming data as source of truth but keep existing if not provided
-    const userMap = new Map();
-
-    // Add existing users first
-    existingData.users?.forEach((user: any) => {
-      userMap.set(user.id, user);
-    });
-
-    // Override/add with incoming users
-    users.forEach((user: any) => {
-      userMap.set(user.id, {
-        ...userMap.get(user.id),
-        ...user,
-        syncedAt: new Date().toISOString()
-      });
-    });
-
-    const mergedUsers = Array.from(userMap.values());
-
-    // Write back to file
-    const success = await writeJSON('users.json', { users: mergedUsers });
-
-    if (!success) {
-      return NextResponse.json(
-        { success: false, message: 'Failed to write users data' },
-        { status: 500 }
-      );
-    }
-
+    const users = dataStore.getUsers();
     return NextResponse.json({
       success: true,
-      message: `Successfully synced ${users.length} users`,
-      syncedCount: users.length,
-      totalUsers: mergedUsers.length
+      data: { users },
     });
   } catch (error) {
-    console.error('Error syncing users:', error);
+    console.error("Error fetching users:", error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: "Failed to fetch users" },
       { status: 500 }
     );
   }

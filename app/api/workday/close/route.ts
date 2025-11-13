@@ -1,66 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON } from '../../lib/storage';
+import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
-// POST - Close workday for a user
-export async function POST(request: NextRequest) {
+const USERS_FILE = path.join(process.cwd(), "..", "data", "users.json");
+
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { userId, closedAt } = body;
+    const { userId, closedAt } = await req.json();
 
     if (!userId || !closedAt) {
       return NextResponse.json(
-        { success: false, message: 'Missing userId or closedAt' },
+        { success: false, message: "userId and closedAt are required" },
         { status: 400 }
       );
     }
 
-    // Read users data
-    const usersData = await readJSON('users.json');
-
-    if (!usersData || !usersData.users) {
-      return NextResponse.json(
-        { success: false, message: 'Failed to read users data' },
-        { status: 500 }
-      );
+    // Read existing users
+    let users = [];
+    if (fs.existsSync(USERS_FILE)) {
+      const fileContent = fs.readFileSync(USERS_FILE, "utf-8");
+      const data = JSON.parse(fileContent);
+      users = data.users || [];
     }
 
-    // Find and update user
-    const userIndex = usersData.users.findIndex((u: any) => u.id === userId);
-
+    // Update user workday status
+    const userIndex = users.findIndex((u: any) => u.id === userId);
     if (userIndex === -1) {
       return NextResponse.json(
-        { success: false, message: 'User not found' },
+        { success: false, message: "User not found" },
         { status: 404 }
       );
     }
 
-    // Update user workday status
-    usersData.users[userIndex] = {
-      ...usersData.users[userIndex],
-      workdayStatus: 'closed',
+    users[userIndex] = {
+      ...users[userIndex],
+      workdayStatus: "closed",
       workdayClosedAt: closedAt,
-      workdayUpdatedAt: new Date().toISOString()
     };
 
-    // Write back to file
-    const success = await writeJSON('users.json', usersData);
+    // Save updated users
+    fs.writeFileSync(
+      USERS_FILE,
+      JSON.stringify({ users }, null, 2),
+      "utf-8"
+    );
 
-    if (!success) {
-      return NextResponse.json(
-        { success: false, message: 'Failed to update user data' },
-        { status: 500 }
-      );
-    }
+    console.log(`[API] Workday closed for user ${userId} at ${closedAt}`);
 
     return NextResponse.json({
       success: true,
-      message: 'Workday closed successfully',
-      user: usersData.users[userIndex]
+      message: "Workday closed successfully",
+      data: { user: users[userIndex] },
     });
   } catch (error) {
-    console.error('Error closing workday:', error);
+    console.error("[API] Error closing workday:", error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      {
+        success: false,
+        message: error instanceof Error ? error.message : "Internal server error",
+      },
       { status: 500 }
     );
   }
