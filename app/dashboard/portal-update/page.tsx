@@ -37,17 +37,33 @@ export default function PortalUpdatePage() {
       const response = await fetch("/api/portal-update/check");
       const data = await response.json();
 
+      console.log("Portal update response:", data);
+
       if (data.success) {
         setUpdateInfo(data.data);
       } else {
-        const errorMsg = data.error
-          ? `Greška: ${data.message}\n\nDetalji: ${data.error}\n\nPlatforma: ${data.platform || 'N/A'}`
-          : data.message || "Greška pri proveri ažuriranja";
+        // Build detailed error message
+        let errorMsg = "Greška pri proveri ažuriranja portala";
+
+        if (data.message) {
+          errorMsg = data.message;
+        }
+
+        if (data.error) {
+          errorMsg += "\n\nDetalji: " + data.error;
+        }
+
+        if (data.platform) {
+          errorMsg += "\n\nPlatforma: " + data.platform;
+        }
+
+        console.error("Update check failed:", errorMsg);
         alert(errorMsg);
       }
     } catch (error) {
       console.error("Error checking for updates:", error);
-      alert("Greška pri proveri ažuriranja: " + (error instanceof Error ? error.message : "Unknown error"));
+      const errorMsg = "Greška pri komunikaciji sa serverom: " + (error instanceof Error ? error.message : String(error));
+      alert(errorMsg);
     } finally {
       setChecking(false);
     }
