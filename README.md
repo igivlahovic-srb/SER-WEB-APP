@@ -39,6 +39,11 @@ Za generisanje novih ikona sa belim slovima:
 - **Ikone**: Ažurirane aplikacione ikone sa belim slovima na plavom gradijent pozadini
 
 ### 🆕 Nove Funkcionalnosti
+- **🔄 Automatska Sinhronizacija**
+  - Automatsko sinhronizovanje servisa i korisnika sa web portalom nakon svake promene
+  - Uključi "Automatska sinhronizacija" u Settings ekranu
+  - Kada je omogućena, svaka promena (novi servis, završen servis, novi korisnik) se odmah šalje na portal
+  - Ne treba više ručno pritisnuti "Sinhronizuj sada" dugme!
 - **📅 Upravljanje Radnim Danima** 🌙
   - **Mobilna aplikacija (Profil tab):**
     - Dugme "Zatvori radni dan" za tehničare u tabu Profil

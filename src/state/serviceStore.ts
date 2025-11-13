@@ -3,6 +3,17 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ServiceTicket, Operation, SparePart } from "../types";
 import webAdminAPI from "../api/web-admin-sync";
+import { useSyncStore } from "./syncStore";
+
+// Helper function to trigger auto sync if enabled
+const triggerAutoSync = async () => {
+  const { autoSync, apiUrl } = useSyncStore.getState();
+  if (autoSync && apiUrl) {
+    console.log("[ServiceStore] Auto sync triggered");
+    const { syncToWeb } = useServiceStore.getState();
+    await syncToWeb();
+  }
+};
 
 interface ServiceState {
   tickets: ServiceTicket[];
@@ -27,17 +38,21 @@ export const useServiceStore = create<ServiceState>()(
     (set, get) => ({
       tickets: [],
       currentTicket: null,
-      addTicket: (ticket) =>
-        set((state) => ({ tickets: [...state.tickets, ticket] })),
-      updateTicket: (id, updates) =>
+      addTicket: (ticket) => {
+        set((state) => ({ tickets: [...state.tickets, ticket] }));
+        triggerAutoSync(); // Auto sync after adding ticket
+      },
+      updateTicket: (id, updates) => {
         set((state) => ({
           tickets: state.tickets.map((t) => (t.id === id ? { ...t, ...updates } : t)),
           currentTicket:
             state.currentTicket?.id === id
               ? { ...state.currentTicket, ...updates }
               : state.currentTicket,
-        })),
-      completeTicket: (id) =>
+        }));
+        triggerAutoSync(); // Auto sync after updating ticket
+      },
+      completeTicket: (id) => {
         set((state) => {
           const endTime = new Date();
           return {
@@ -72,8 +87,10 @@ export const useServiceStore = create<ServiceState>()(
                   })()
                 : state.currentTicket,
           };
-        }),
-      reopenTicket: (id) =>
+        });
+        triggerAutoSync(); // Auto sync after completing ticket
+      },
+      reopenTicket: (id) => {
         set((state) => ({
           tickets: state.tickets.map((t) =>
             t.id === id
@@ -89,7 +106,9 @@ export const useServiceStore = create<ServiceState>()(
                   durationMinutes: undefined,
                 }
               : state.currentTicket,
-        })),
+        }));
+        triggerAutoSync(); // Auto sync after reopening ticket
+      },
       setCurrentTicket: (ticket) => set({ currentTicket: ticket }),
       addOperationToCurrentTicket: (operation) =>
         set((state) => {

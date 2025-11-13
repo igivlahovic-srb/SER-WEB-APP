@@ -3,6 +3,17 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../types";
 import webAdminAPI from "../api/web-admin-sync";
+import { useSyncStore } from "./syncStore";
+
+// Helper function to trigger auto sync if enabled
+const triggerAutoSync = async () => {
+  const { autoSync, apiUrl } = useSyncStore.getState();
+  if (autoSync && apiUrl) {
+    console.log("[AuthStore] Auto sync triggered");
+    const { syncToWeb } = useAuthStore.getState();
+    await syncToWeb();
+  }
+};
 
 interface AuthState {
   user: User | null;
@@ -85,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
         set((state) => ({
           allUsers: [...state.allUsers, user],
         }));
+        triggerAutoSync(); // Auto sync after adding user
       },
       updateUser: (id, updates) => {
         set((state) => ({
@@ -92,11 +104,13 @@ export const useAuthStore = create<AuthState>()(
             u.id === id ? { ...u, ...updates } : u
           ),
         }));
+        triggerAutoSync(); // Auto sync after updating user
       },
       deleteUser: (id) => {
         set((state) => ({
           allUsers: state.allUsers.filter((u) => u.id !== id),
         }));
+        triggerAutoSync(); // Auto sync after deleting user
       },
       toggleUserActive: (id) => {
         set((state) => ({
@@ -104,6 +118,7 @@ export const useAuthStore = create<AuthState>()(
             u.id === id ? { ...u, isActive: !u.isActive } : u
           ),
         }));
+        triggerAutoSync(); // Auto sync after toggling user active status
       },
       syncToWeb: async () => {
         try {
