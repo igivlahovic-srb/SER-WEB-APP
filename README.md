@@ -107,6 +107,7 @@ Za generisanje novih ikona sa belim slovima:
 - `DEPLOY_EAS_CONFIG_FIX.sh`: **NOVO!** Script za deploy EAS configuration fix-a na server
 - `QUICK_START_DOWNLOAD_LINKS.md`: Quick reference za prikaz download linkova
 - `BIDIRECTIONAL_SYNC_GUIDE.md`: Detaljno objašnjenje bidirekcione sinhronizacije
+- `SYNC_DOCUMENTATION.md`: **NOVO!** Kompletna dokumentacija sinhronizacije sa testovima (100% testova prošlo)
 - `ICON_GENERATOR_INSTRUCTIONS.md`: Uputstvo za generisanje ikona
 - `LOGIN_LOGO_GUIDE.md`: Uputstvo za login screen logo
 - `IOS_REFRESH_GUIDE.md`: Troubleshooting za iOS cache probleme
