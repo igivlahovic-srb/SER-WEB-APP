@@ -10,7 +10,7 @@ export default function ServicesPage() {
   const [user, setUser] = useState<Omit<User, "password"> | null>(null);
   const [tickets, setTickets] = useState<ServiceTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "in_progress" | "completed">("all");
+  const [filter, setFilter] = useState<"all" | "in_progress" | "completed" | "cancelled">("all");
   const [selectedTicket, setSelectedTicket] = useState<ServiceTicket | null>(null);
   const [filters, setFilters] = useState({
     serviceNumber: "",
@@ -75,6 +75,30 @@ export default function ServicesPage() {
     }
   };
 
+  const handleCancelTicket = async (ticketId: string) => {
+    if (!confirm("Da li ste sigurni da želite poništiti ovaj servis? Ova akcija će označiti servis kao poništen.")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/tickets/${ticketId}/cancel`, {
+        method: "POST",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Servis je uspešno poništen!");
+        setSelectedTicket(null);
+        loadTickets();
+      } else {
+        alert("Greška: " + (data.message || "Nije moguće poništiti servis"));
+      }
+    } catch (error) {
+      console.error("Error cancelling ticket:", error);
+      alert("Greška pri poništavanju servisa");
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem("admin-user");
     router.push("/");
@@ -95,6 +119,7 @@ export default function ServicesPage() {
     // Status filter from buttons
     if (filter === "in_progress" && t.status !== "in_progress") return false;
     if (filter === "completed" && t.status !== "completed") return false;
+    if (filter === "cancelled" && t.status !== "cancelled") return false;
 
     // Column filters
     if (filters.serviceNumber && !t.serviceNumber.toLowerCase().includes(filters.serviceNumber.toLowerCase())) return false;
@@ -107,6 +132,7 @@ export default function ServicesPage() {
 
   const activeCount = tickets.filter((t) => t.status === "in_progress").length;
   const completedCount = tickets.filter((t) => t.status === "completed").length;
+  const cancelledCount = tickets.filter((t) => t.status === "cancelled").length;
   const totalOperations = tickets.reduce((sum, t) => sum + t.operations.length, 0);
 
   return (
@@ -174,8 +200,8 @@ export default function ServicesPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <h3 className="text-gray-600 font-medium mb-2">Operacije</h3>
-            <p className="text-4xl font-bold text-blue-600">{totalOperations}</p>
+            <h3 className="text-gray-600 font-medium mb-2">Poništeno</h3>
+            <p className="text-4xl font-bold text-red-600">{cancelledCount}</p>
           </div>
         </div>
 
@@ -217,6 +243,16 @@ export default function ServicesPage() {
                   }`}
                 >
                   Završeni ({completedCount})
+                </button>
+                <button
+                  onClick={() => setFilter("cancelled")}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    filter === "cancelled"
+                      ? "bg-red-600 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Poništeni ({cancelledCount})
                 </button>
               </div>
             </div>
@@ -279,6 +315,7 @@ export default function ServicesPage() {
                     <option value="">Svi statusi</option>
                     <option value="in_progress">U toku</option>
                     <option value="completed">Završeno</option>
+                    <option value="cancelled">Poništeno</option>
                   </select>
                 </div>
                 {(filters.serviceNumber || filters.deviceCode || filters.technician || filters.status) && (
@@ -363,6 +400,10 @@ export default function ServicesPage() {
                             <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
                               Završeno
                             </span>
+                          ) : ticket.status === "cancelled" ? (
+                            <span className="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
+                              Poništeno
+                            </span>
                           ) : (
                             <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
                               U toku
@@ -441,6 +482,10 @@ export default function ServicesPage() {
                     {selectedTicket.status === "completed" ? (
                       <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
                         Završeno
+                      </span>
+                    ) : selectedTicket.status === "cancelled" ? (
+                      <span className="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                        Poništeno
                       </span>
                     ) : (
                       <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
@@ -585,9 +630,17 @@ export default function ServicesPage() {
                     Ponovo otvori servis
                   </button>
                 )}
+                {selectedTicket.status === "in_progress" && (
+                  <button
+                    onClick={() => handleCancelTicket(selectedTicket.id)}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors"
+                  >
+                    Poništi servis
+                  </button>
+                )}
                 <button
                   onClick={() => setSelectedTicket(null)}
-                  className={`${selectedTicket.status === "completed" ? "flex-1" : "w-full"} bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition-colors`}
+                  className={`${selectedTicket.status === "completed" || selectedTicket.status === "in_progress" ? "flex-1" : "w-full"} bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition-colors`}
                 >
                   Zatvori
                 </button>

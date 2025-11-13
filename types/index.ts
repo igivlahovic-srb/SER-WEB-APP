@@ -34,7 +34,7 @@ export interface ServiceTicket {
   startTime: Date | string;
   endTime?: Date | string;
   durationMinutes?: number; // Trajanje servisa u minutima
-  status: "in_progress" | "completed";
+  status: "in_progress" | "completed" | "cancelled";
   operations: Operation[];
   spareParts: SparePart[];
   notes?: string;
