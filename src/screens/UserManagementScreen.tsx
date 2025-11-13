@@ -92,7 +92,7 @@ export default function UserManagementScreen() {
   const handleEditUser = () => {
     if (!editingUser) return;
 
-    if (!formCharismaId.trim() || !formName.trim() || !formDepot.trim()) {
+    if (!formCharismaId?.trim() || !formName?.trim() || !formDepot?.trim()) {
       Alert.alert("Greška", "Sva polja moraju biti popunjena");
       return;
     }
@@ -113,7 +113,7 @@ export default function UserManagementScreen() {
     });
 
     // If password is changed
-    if (formPassword.trim()) {
+    if (formPassword?.trim()) {
       const userWithPassword = allUsers.find((u) => u.id === editingUser.id);
       if (userWithPassword) {
         const updatedUser = { ...userWithPassword, password: formPassword };
@@ -162,10 +162,10 @@ export default function UserManagementScreen() {
 
   const openEditModal = (user: User & { password: string }) => {
     setEditingUser(user);
-    setFormCharismaId(user.charismaId);
-    setFormName(user.name);
-    setFormDepot(user.depot);
-    setFormRole(user.role);
+    setFormCharismaId(user.charismaId || "");
+    setFormName(user.name || "");
+    setFormDepot(user.depot || "");
+    setFormRole(user.role || "technician");
     setFormPassword("");
     setShowEditModal(true);
   };
