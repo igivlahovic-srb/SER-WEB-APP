@@ -3,17 +3,22 @@ import { dataStore } from "../../../../lib/dataStore";
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("[SYNC] Received POST request to /api/sync/tickets");
     const body = await req.json();
+    console.log("[SYNC] Request body:", JSON.stringify(body).substring(0, 200));
     const { tickets } = body;
 
     if (!tickets || !Array.isArray(tickets)) {
+      console.log("[SYNC] Invalid tickets data - not an array");
       return NextResponse.json(
         { success: false, message: "Invalid tickets data" },
         { status: 400 }
       );
     }
 
+    console.log(`[SYNC] Syncing ${tickets.length} tickets to dataStore`);
     dataStore.setTickets(tickets);
+    console.log("[SYNC] Tickets synced successfully");
 
     return NextResponse.json({
       success: true,
@@ -21,7 +26,7 @@ export async function POST(req: NextRequest) {
       data: { count: tickets.length },
     });
   } catch (error) {
-    console.error("Error syncing tickets:", error);
+    console.error("[SYNC] Error syncing tickets:", error);
     return NextResponse.json(
       { success: false, message: "Failed to sync tickets" },
       { status: 500 }
