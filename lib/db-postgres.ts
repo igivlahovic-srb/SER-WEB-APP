@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "pg";
+import { Pool, QueryResult, QueryResultRow } from "pg";
 
 // PostgreSQL Configuration
 const config = {
@@ -40,7 +40,7 @@ export async function getPool(): Promise<Pool> {
  * @param query SQL query string
  * @param params Optional parameters array
  */
-export async function query<T = any>(
+export async function query<T extends QueryResultRow = any>(
   query: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
