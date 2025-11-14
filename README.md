@@ -2,6 +2,35 @@
 
 Web administrativna aplikacija za upravljanje i pregled podataka iz La Fantana WHS mobilne aplikacije.
 
+## 🚀 Quick Start - Ubuntu Production Deployment
+
+**Za profesionalan deployment na Ubuntu serveru sa Nginx i SSL:**
+
+```bash
+# 1. Kopiraj web-admin folder na server
+scp -r web-admin root@YOUR_SERVER_IP:/root/
+
+# 2. SSH na server i pokreni deployment skriptu
+ssh root@YOUR_SERVER_IP
+cd /root/web-admin
+sudo bash DEPLOY_TO_UBUNTU.sh
+```
+
+**Portal će biti dostupan na:** `https://admin.lafantanasrb.local`
+
+**Deployment uključuje:**
+- ✅ Nginx reverse proxy sa SSL
+- ✅ PM2 process manager (auto-start pri boot-u)
+- ✅ Production build
+- ✅ Self-signed SSL certifikat (10 godina)
+- ✅ Firewall konfiguraciju
+- ✅ Security headers
+
+**📚 Deployment Dokumentacija:**
+- **[QUICK_START.md](./QUICK_START.md)** - 5-minutni brzi start
+- **[UBUNTU_DEPLOYMENT_GUIDE.md](./UBUNTU_DEPLOYMENT_GUIDE.md)** - Kompletan deployment guide
+- **[DEPLOY_TO_UBUNTU.sh](./DEPLOY_TO_UBUNTU.sh)** - Automatski deployment script
+
 ## 🌐 Funkcionalnosti
 
 ### 🔐 Autentifikacija

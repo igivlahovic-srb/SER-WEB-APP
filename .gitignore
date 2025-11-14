@@ -12,3 +12,20 @@ dist
 *.tgz
 .cache
 package-lock.json
+
+# Production database files (IMPORTANT: Never commit user data)
+data/*.json
+!data/.gitkeep
+
+# Backups
+data/backups/
+*.backup
+*.tar.gz
+
+# PM2
+.pm2/
+ecosystem.config.js
+
+# Nginx logs
+*.access.log
+*.error.log

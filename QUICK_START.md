@@ -1,177 +1,187 @@
-# Quick Start - Web Admin Panel na Ubuntu 22.04
+# 🚀 BRZI START - Deploy na Ubuntu u 5 minuta
 
-Brza instalacija za iskusnije korisnike.
-
----
-
-## 🚀 Automatska instalacija (preporučeno)
-
-```bash
-# 1. Prebaci web-admin folder na server
-scp -r web-admin/ user@server-ip:/home/user/
-
-# 2. SSH na server
-ssh user@server-ip
-
-# 3. Uđi u folder
-cd ~/web-admin
-
-# 4. Pokreni instalacioni script
-chmod +x install-ubuntu.sh
-./install-ubuntu.sh
-```
-
-Script automatski instalira:
-- Node.js 20.x LTS
-- Bun
-- Sve npm pakete
-- Build aplikacije
-- Firewall konfiguraciju
-- PM2 process manager (opciono)
-- Nginx reverse proxy (opciono)
+## 📋 Šta ti treba:
+- Ubuntu server sa SSH pristupom
+- Root ili sudo pristup
 
 ---
 
-## ⚡ Manualna instalacija (brza)
+## ⚡ AUTOMATSKI DEPLOYMENT (Preporučeno)
 
+### Korak 1: Kopiraj folder na server
 ```bash
-# Ažuriraj sistem
-sudo apt update && sudo apt upgrade -y
+scp -r web-admin root@YOUR_SERVER_IP:/root/
+```
+Zameni `YOUR_SERVER_IP` sa IP adresom tvog servera (npr. `192.168.1.100`)
 
-# Instaliraj Node.js 20.x
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# Instaliraj Bun
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
-
-# Uđi u web-admin folder
-cd ~/web-admin
-
-# Instaliraj pakete
-bun install
-
-# Build
-bun run build
-
-# Pokreni
-bun run start
+### Korak 2: Konektuj se i pokreni skriptu
+```bash
+ssh root@YOUR_SERVER_IP
+cd /root/web-admin
+sudo bash DEPLOY_TO_UBUNTU.sh
 ```
 
-Aplikacija dostupna na: `http://server-ip:3002`
+**To je to!** ✅
+
+Portal će biti dostupan na:
+- **URL:** `https://admin.lafantanasrb.local`
+- **Username:** `admin`
+- **Password:** `admin123`
+
+Script automatski instalira i podešava:
+- ✅ Node.js 20.x LTS
+- ✅ Bun runtime
+- ✅ Nginx reverse proxy sa SSL
+- ✅ PM2 process manager
+- ✅ Self-signed SSL certifikat (10 godina)
+- ✅ Automatski start pri boot-u
+- ✅ Firewall konfiguraciju
+- ✅ Production build
 
 ---
 
-## 🔄 PM2 (održavanje aplikacije pokrenutom)
+## 🌐 Kako pristupiti sa drugih računara?
 
+### Na tvom računaru (Windows):
+
+1. Otvori Notepad **kao Administrator**
+2. Otvori fajl: `C:\Windows\System32\drivers\etc\hosts`
+3. Na kraj dodaj liniju:
+   ```
+   192.168.1.100    admin.lafantanasrb.local
+   ```
+   (Zameni `192.168.1.100` sa IP-jem tvog servera)
+4. Sačuvaj fajl
+5. Otvori browser: `https://admin.lafantanasrb.local`
+
+### Na Linux/Mac:
 ```bash
-# Instaliraj PM2
-sudo npm install -g pm2
-
-# Pokreni aplikaciju
-cd ~/web-admin
-pm2 start "bun run start" --name water-admin
-pm2 save
-pm2 startup
-# IZVRŠI KOMANDU KOJU PM2 ISPIŠE!
+sudo nano /etc/hosts
 ```
-
----
-
-## 🌐 Nginx (pristup na portu 80)
-
-```bash
-# Instaliraj Nginx
-sudo apt install -y nginx
-
-# Kreiraj config
-sudo nano /etc/nginx/sites-available/water-admin
-```
-
 Dodaj:
-```nginx
-server {
-    listen 80;
-    server_name _;
-
-    location / {
-        proxy_pass http://localhost:3002;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
+```
+192.168.1.100    admin.lafantanasrb.local
 ```
 
-Aktiviraj:
+---
+
+## 🔧 Osnovne komande nakon instalacije
+
+### Proveri status:
 ```bash
-sudo ln -s /etc/nginx/sites-available/water-admin /etc/nginx/sites-enabled/
-sudo rm /etc/nginx/sites-enabled/default
-sudo nginx -t
+pm2 status
+```
+
+### Vidi logove:
+```bash
+pm2 logs lafantana-whs-admin
+```
+
+### Restartuj portal:
+```bash
+pm2 restart lafantana-whs-admin
+```
+
+### Zaustavi portal:
+```bash
+pm2 stop lafantana-whs-admin
+```
+
+### Nginx komande:
+```bash
+# Status
+sudo systemctl status nginx
+
+# Restartuj
 sudo systemctl restart nginx
-sudo ufw allow 80/tcp
+
+# Logovi
+sudo tail -f /var/log/nginx/lafantana-admin-access.log
 ```
 
 ---
 
-## 📱 Povezivanje sa mobilnom aplikacijom
+## 📱 SSL Upozorenje u browser-u?
 
-1. Prijavi se kao **admin** (admin/admin123)
-2. **Profil → Settings**
-3. Unesi URL: `http://SERVER-IP:3002`
-4. **Sačuvaj** → **Testiraj konekciju** → **Sinhronizuj**
+Browser će pokazati upozorenje jer koristimo self-signed SSL certifikat. To je normalno!
 
-**VAŽNO**: Koristi IP adresu servera, NE `localhost`!
+**Opcija 1:** Klikni "Advanced" → "Proceed to site" (svaki put)
+
+**Opcija 2:** Instaliraj certifikat (jednom):
+
+```bash
+# Preuzmi sa servera
+scp root@YOUR_SERVER_IP:/etc/nginx/ssl/lafantana-whs-admin.crt ./
+
+# Na Windows: double-click i instaliraj u "Trusted Root"
+# Na Linux:
+sudo cp lafantana-whs-admin.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
 
 ---
 
-## ✅ Verifikacija
+## 🔄 Kako da update-ujem portal?
 
 ```bash
-# Proveri da li radi
-curl http://localhost:3002
+# 1. Kopiraj nove fajlove
+scp -r web-admin root@YOUR_SERVER_IP:/root/
 
-# Proveri PM2
+# 2. SSH i redeploy
+ssh root@YOUR_SERVER_IP
+cd /root/web-admin
+sudo bash DEPLOY_TO_UBUNTU.sh
+```
+
+---
+
+## 🐛 Nešto ne radi?
+
+### Problem: Portal ne radi (502 greška)
+```bash
+# Proveri status
 pm2 status
 
-# Proveri portove
-sudo ss -tlnp | grep 3002
+# Restartuj
+pm2 restart lafantana-whs-admin
+
+# Vidi šta je problem
+pm2 logs lafantana-whs-admin
 ```
 
----
-
-## 🐛 Troubleshooting
-
-### "bun: command not found"
+### Problem: Ne mogu da pristupim sa drugog računara
 ```bash
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-```
-
-### Port zauzet
-```bash
-sudo lsof -i :3002
-sudo kill -9 PID
-```
-
-### Firewall blokira
-```bash
-sudo ufw allow 3002/tcp
+# Proveri firewall
 sudo ufw status
+
+# Otvori portove ako treba
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+### Problem: "Connection refused"
+```bash
+# Proveri da li nginx radi
+sudo systemctl status nginx
+
+# Pokreni nginx ako ne radi
+sudo systemctl start nginx
 ```
 
 ---
 
-## 🔐 Default login
+## ✅ Gotovo!
 
-- **Username**: `admin`
-- **Password**: `admin123`
+Web admin portal je sada instaliran i radi profesionalno preko nginx-a sa:
+- ✅ HTTPS enkripcijom
+- ✅ Automatski start pri boot-u (PM2)
+- ✅ Production build (brz i optimizovan)
+- ✅ Nginx reverse proxy
+- ✅ Logging sistem
 
-**⚠️ OBAVEZNO PROMENI LOZINKU!**
+**Za detaljne instrukcije, pogledaj:** `UBUNTU_DEPLOYMENT_GUIDE.md`
 
 ---
 
-**Za detaljnu dokumentaciju pogledaj: UBUNTU_INSTALL.md**
+**Portal:** La Fantana WHS Admin
+**Verzija:** 2.1.0
