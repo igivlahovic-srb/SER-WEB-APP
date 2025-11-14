@@ -15,7 +15,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../state/authStore";
+import { useTwoFactorStore } from "../state/twoFactorStore";
 import * as Application from "expo-application";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/RootNavigator";
 
 // Conditionally import expo-updates only if available
 let Updates: any = null;
@@ -24,6 +28,8 @@ try {
 } catch (e) {
   console.log("expo-updates not available in development mode");
 }
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function LoginScreen() {
   const [username, setUsername] = useState("");
@@ -35,6 +41,8 @@ export default function LoginScreen() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const login = useAuthStore((s) => s.login);
+  const pendingTwoFactorUserId = useAuthStore((s) => s.pendingTwoFactorUserId);
+  const navigation = useNavigation<NavigationProp>();
 
   // Check for updates on mount
   useEffect(() => {
@@ -101,7 +109,13 @@ export default function LoginScreen() {
 
     const success = await login(username.trim(), password);
 
-    if (!success) {
+    if (success === "2fa_required") {
+      // Navigate to 2FA verification screen
+      const userId = useAuthStore.getState().pendingTwoFactorUserId;
+      if (userId) {
+        navigation.navigate("TwoFactorVerify", { userId });
+      }
+    } else if (!success) {
       setError("Neispravno korisničko ime ili lozinka");
     }
 

@@ -6,6 +6,7 @@ import { useAuthStore } from "../state/authStore";
 
 // Import screens
 import LoginScreen from "../screens/LoginScreen";
+import TwoFactorVerifyScreen from "../screens/TwoFactorVerifyScreen";
 import DashboardScreen from "../screens/DashboardScreen";
 import ScannerScreen from "../screens/ScannerScreen";
 import ServiceTicketScreen from "../screens/ServiceTicketScreen";
@@ -13,12 +14,16 @@ import HistoryScreen from "../screens/HistoryScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import UserManagementScreen from "../screens/UserManagementScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import TwoFactorSetupScreen from "../screens/TwoFactorSetupScreen";
 
 export type RootStackParamList = {
+  Login: undefined;
+  TwoFactorVerify: { userId: string };
   MainTabs: undefined;
   Scanner: undefined;
   ServiceTicket: undefined;
   Settings: undefined;
+  TwoFactorSetup: undefined;
 };
 
 export type MainTabParamList = {
@@ -115,10 +120,7 @@ function MainTabs() {
 
 export default function RootNavigator() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-
-  if (!isAuthenticated) {
-    return <LoginScreen />;
-  }
+  const pendingTwoFactorUserId = useAuthStore((s) => s.pendingTwoFactorUserId);
 
   return (
     <Stack.Navigator
@@ -126,32 +128,58 @@ export default function RootNavigator() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="MainTabs" component={MainTabs} />
-      <Stack.Screen
-        name="Scanner"
-        component={ScannerScreen}
-        options={{
-          presentation: "fullScreenModal",
-        }}
-      />
-      <Stack.Screen
-        name="ServiceTicket"
-        component={ServiceTicketScreen}
-        options={{
-          headerShown: true,
-          title: "Servisni nalog",
-          headerBackTitle: "Nazad",
-        }}
-      />
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          headerShown: true,
-          title: "Podešavanja",
-          headerBackTitle: "Nazad",
-        }}
-      />
+      {!isAuthenticated ? (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          {pendingTwoFactorUserId && (
+            <Stack.Screen
+              name="TwoFactorVerify"
+              component={TwoFactorVerifyScreen}
+              options={{
+                presentation: "fullScreenModal",
+                headerShown: false,
+              }}
+              initialParams={{ userId: pendingTwoFactorUserId }}
+            />
+          )}
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen
+            name="Scanner"
+            component={ScannerScreen}
+            options={{
+              presentation: "fullScreenModal",
+            }}
+          />
+          <Stack.Screen
+            name="ServiceTicket"
+            component={ServiceTicketScreen}
+            options={{
+              headerShown: true,
+              title: "Servisni nalog",
+              headerBackTitle: "Nazad",
+            }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              headerShown: true,
+              title: "Podešavanja",
+              headerBackTitle: "Nazad",
+            }}
+          />
+          <Stack.Screen
+            name="TwoFactorSetup"
+            component={TwoFactorSetupScreen}
+            options={{
+              presentation: "modal",
+            }}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 }

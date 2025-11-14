@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../types";
 import webAdminAPI from "../api/web-admin-sync";
 import { useSyncStore } from "./syncStore";
+import { useTwoFactorStore } from "./twoFactorStore";
 
 // Helper function to trigger auto sync if enabled
 const triggerAutoSync = async () => {
@@ -19,7 +20,9 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   allUsers: (User & { password: string })[];
-  login: (username: string, password: string) => Promise<boolean>;
+  pendingTwoFactorUserId: string | null;
+  login: (username: string, password: string) => Promise<boolean | "2fa_required">;
+  completeTwoFactorLogin: () => void;
   logout: () => void;
   addUser: (user: User & { password: string }) => void;
   updateUser: (id: string, updates: Partial<User>) => void;
@@ -74,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       allUsers: INITIAL_USERS,
+      pendingTwoFactorUserId: null,
       login: async (username: string, password: string) => {
         // Simulate API call delay
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -83,14 +87,38 @@ export const useAuthStore = create<AuthState>()(
         );
 
         if (user) {
+          // Check if 2FA is enabled for this user
+          const is2FAEnabled = useTwoFactorStore.getState().isTwoFactorEnabled(user.id);
+
+          if (is2FAEnabled) {
+            // Store user ID for pending 2FA verification
+            set({ pendingTwoFactorUserId: user.id });
+            return "2fa_required";
+          }
+
+          // No 2FA, complete login
           const { password: _, ...userWithoutPassword } = user;
-          set({ user: userWithoutPassword, isAuthenticated: true });
+          set({ user: userWithoutPassword, isAuthenticated: true, pendingTwoFactorUserId: null });
           return true;
         }
         return false;
       },
+      completeTwoFactorLogin: () => {
+        const pendingUserId = get().pendingTwoFactorUserId;
+        if (!pendingUserId) return;
+
+        const user = get().allUsers.find((u) => u.id === pendingUserId);
+        if (user) {
+          const { password: _, ...userWithoutPassword } = user;
+          set({
+            user: userWithoutPassword,
+            isAuthenticated: true,
+            pendingTwoFactorUserId: null
+          });
+        }
+      },
       logout: () => {
-        set({ user: null, isAuthenticated: false });
+        set({ user: null, isAuthenticated: false, pendingTwoFactorUserId: null });
       },
       addUser: (user) => {
         set((state) => ({
@@ -204,6 +232,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        pendingTwoFactorUserId: state.pendingTwoFactorUserId,
         allUsers: state.allUsers.map((u) => ({
           ...u,
           createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : u.createdAt,

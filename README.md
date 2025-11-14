@@ -129,6 +129,12 @@ La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisni
 
 ### 🔐 Autentifikacija
 - **Prijava sa ulogama**: Dva nivoa pristupa (Super User i Serviser)
+- **Dvofaktorska autentifikacija (2FA)**: Dodatna zaštita naloga
+  - Opciona 2FA zaštita za sve korisnike
+  - QR kod setup sa authenticator aplikacijama (Google Authenticator, Authy, itd.)
+  - 10 backup kodova za pristup bez telefona
+  - Mogućnost regenerisanja backup kodova
+  - Jednostavno omogućavanje/onemogućavanje kroz Profil
 - **Perzistentna sesija**: Automatsko čuvanje prijavljenog korisnika
 - **Demo pristup**: Unapred konfigurisani nalozi za testiranje
 - **Aktivni/Neaktivni korisnici**: Admini mogu deaktivirati naloge bez brisanja
@@ -203,6 +209,11 @@ La Fantana WHS (Water Handling System) je moderan sistem za upravljanje servisni
   - Servisi u toku
   - Ukupno operacija
   - Utrošeni delovi
+- **Dvofaktorska autentifikacija (2FA)**:
+  - Omogućavanje/onemogućavanje 2FA zaštite
+  - Pregled preostalih backup kodova
+  - Regenerisanje novih backup kodova
+  - QR kod setup sa authenticator aplikacijama
 - **Informacije o nalogu**: Korisničko ime, ime, uloga
 - **Brza sinhronizacija**: Direktno dugme za sinhronizaciju podataka (dostupno svima)
 - **Zatvori radni dan**: Dugme za zatvaranje radnog dana (samo tehničari)
@@ -257,14 +268,17 @@ src/
 │   ├── ScannerScreen.tsx
 │   ├── ServiceTicketScreen.tsx
 │   ├── HistoryScreen.tsx
-│   └── ProfileScreen.tsx
+│   ├── ProfileScreen.tsx
+│   ├── TwoFactorSetupScreen.tsx
+│   └── TwoFactorVerifyScreen.tsx
 ├── navigation/        # React Navigation setup
 │   └── RootNavigator.tsx
 ├── state/            # Zustand state management
 │   ├── authStore.ts
 │   ├── serviceStore.ts
 │   ├── syncStore.ts
-│   └── configStore.ts
+│   ├── configStore.ts
+│   └── twoFactorStore.ts
 ├── types/            # TypeScript types
 │   └── index.ts
 └── utils/            # Helper functions
@@ -276,6 +290,8 @@ src/
 - **Zustand** - State management sa AsyncStorage perzistencijom
 - **NativeWind** - Tailwind CSS stilizacija
 - **Expo Camera** - QR kod skeniranje
+- **Expo Crypto** - 2FA TOTP generisanje i verifikacija
+- **react-native-qrcode-svg** - QR kod generisanje za 2FA setup
 - **TypeScript** - Type safety
 - **date-fns** - Formatiranje datuma
 
@@ -324,33 +340,45 @@ Detaljnije informacije: `IOS_REFRESH_GUIDE.md`
 
 ### Za servisera:
 1. Prijava sa naloga
-2. Klik na "Novi servis" ili scanner ikona
-3. Skeniranje QR koda water aparata (ili manuelni unos)
-4. Dodavanje izvršenih operacija
-5. Dodavanje utrošenih rezervnih delova (opciono)
-6. Završetak servisa
-7. Pregled istorije svih servisa
-8. **Sinhronizacija podataka**: Profil → "Sinhronizuj podatke" dugme
-9. **Zatvaranje radnog dana**: Profil → "Zatvori radni dan" dugme (nakon završetka svih servisa)
+2. (Opciono) Unos 2FA koda ako je omogućeno
+3. Klik na "Novi servis" ili scanner ikona
+4. Skeniranje QR koda water aparata (ili manuelni unos)
+5. Dodavanje izvršenih operacija
+6. Dodavanje utrošenih rezervnih delova (opciono)
+7. Završetak servisa
+8. Pregled istorije svih servisa
+9. **Sinhronizacija podataka**: Profil → "Sinhronizuj podatke" dugme
+10. **Zatvaranje radnog dana**: Profil → "Zatvori radni dan" dugme (nakon završetka svih servisa)
 
 ### Za super usera:
 1. Prijava sa naloga
-2. Pregled kontrolne table sa svim statistikama
-3. **Upravljanje korisnicima** (novi tab):
+2. (Opciono) Unos 2FA koda ako je omogućeno
+3. Pregled kontrolne table sa svim statistikama
+4. **Upravljanje korisnicima** (novi tab):
    - Dodavanje novih servisera/administratora
    - Izmena postojećih korisnika
    - Deaktivacija/aktivacija naloga
    - Brisanje korisnika
-4. Uvid u sve servise svih servisera
-5. Analiza istorije i performansi
-6. **Sinhronizacija sa web admin panelom**:
+5. Uvid u sve servise svih servisera
+6. Analiza istorije i performansi
+7. **Sinhronizacija sa web admin panelom**:
    - Pristup Settings ekranu iz Profila
    - Konfiguracija URL-a web panela
    - Sinhronizacija svih korisnika i servisa
-7. **Upravljanje radnim danima** (na web portalu):
+8. **Upravljanje radnim danima** (na web portalu):
    - Pregled servisera sa zatvorenim radnim danima
    - Otvaranje radnog dana sa pisanim obrazloženjem
    - Pregled istorije otvaranja radnih dana
+
+### Podešavanje 2FA (svi korisnici):
+1. Prijavite se na aplikaciju
+2. Idite na **Profil** tab
+3. Kliknite na karticu **"Dvofaktorska autentifikacija"**
+4. Kliknite **"Omogući 2FA"**
+5. Skenirajte QR kod sa authenticator aplikacijom (Google Authenticator, Authy, Microsoft Authenticator, itd.)
+6. Unesite 6-cifreni kod za potvrdu
+7. **VAŽNO**: Sačuvajte 10 backup kodova na sigurnom mestu
+8. Od sledećeg logovanja, unosićete 2FA kod nakon lozinke
 
 ## 🌐 Web Admin Panel
 
@@ -510,6 +538,7 @@ Više informacija u `web-admin/README.md`
 
 - Aplikacija koristi perzistentno čuvanje podataka (AsyncStorage)
 - Korisnici, servisi i podaci se čuvaju lokalno
+- **2FA podaci (tajni ključevi i backup kodovi) se čuvaju lokalno na uređaju**
 - Super admini imaju poseban tab "Korisnici" za upravljanje korisnicima
 - Neaktivni korisnici ne mogu da se prijave
 - Korisnik ne može da obriše ili deaktivira sam sebe
@@ -529,6 +558,45 @@ Mogući dodaci za verziju 2.0:
 - Kalendar zakazanih servisa
 - Napredna statistika i grafikoni
 - Offline mod sa sync-om
+
+## 🔒 Sigurnost - Dvofaktorska Autentifikacija (2FA)
+
+### Šta je 2FA?
+Dvofaktorska autentifikacija dodaje dodatni sloj sigurnosti vašem nalogu. Pored korisničkog imena i lozinke, morate uneti i 6-cifreni kod koji se menja svakih 30 sekundi.
+
+### Kako funkcionira?
+1. **Setup**: Skenirate QR kod sa authenticator aplikacijom (Google Authenticator, Authy, Microsoft Authenticator)
+2. **Login**: Nakon unosa lozinke, unosite trenutni 6-cifreni kod iz aplikacije
+3. **Backup kodovi**: Dobijate 10 kodova za pristup ako izgubite telefon
+
+### Prednosti:
+- ✅ Zaštita od neovlašćenog pristupa
+- ✅ Sigurnost čak i ako neko sazna vašu lozinku
+- ✅ Backup kodovi za hitne slučajeve
+- ✅ Jednostavno omogućavanje/onemogućavanje
+
+### Kako aktivirati 2FA:
+1. Otvorite **Profil** tab
+2. Pronađite sekciju **"Dvofaktorska autentifikacija"**
+3. Kliknite **"Omogući 2FA"**
+4. Preuzmite authenticator aplikaciju ako je nemate:
+   - [Google Authenticator](https://support.google.com/accounts/answer/1066447) (iOS/Android)
+   - [Microsoft Authenticator](https://www.microsoft.com/en-us/security/mobile-authenticator-app) (iOS/Android)
+   - [Authy](https://authy.com/) (iOS/Android/Desktop)
+5. Skenirajte QR kod prikazan na ekranu
+6. Unesite 6-cifreni kod za potvrdu
+7. **Sačuvajte 10 backup kodova** na sigurnom mestu!
+
+### Backup kodovi:
+- Svaki kod može se koristiti **samo jednom**
+- Koristite ih ako nemate pristup telefonu
+- Možete ih regenerisati iz Profila
+- Čuvajte ih na sigurnom mestu (password manager, papir u sefu, itd.)
+
+### Ako izgubite telefon:
+1. Koristite jedan od backup kodova za prijavu
+2. Onemogućite 2FA u Profilu
+3. Ponovo omogućite sa novim telefonom
 
 ---
 

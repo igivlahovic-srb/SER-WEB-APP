@@ -8,6 +8,7 @@ import { RootStackParamList } from "../navigation/RootNavigator";
 import { useAuthStore } from "../state/authStore";
 import { useServiceStore } from "../state/serviceStore";
 import { useSyncStore } from "../state/syncStore";
+import { useTwoFactorStore } from "../state/twoFactorStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { format } from "date-fns";
 
@@ -24,6 +25,12 @@ export default function ProfileScreen() {
   const [syncing, setSyncing] = useState(false);
   const [showCloseWorkdayModal, setShowCloseWorkdayModal] = useState(false);
   const [isClosingWorkday, setIsClosingWorkday] = useState(false);
+  const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
+
+  const isTwoFactorEnabled = useTwoFactorStore((s) => s.isTwoFactorEnabled(user?.id || ""));
+  const disableTwoFactor = useTwoFactorStore((s) => s.disableTwoFactor);
+  const getBackupCodes = useTwoFactorStore((s) => s.getBackupCodes);
+  const regenerateBackupCodes = useTwoFactorStore((s) => s.regenerateBackupCodes);
 
   const apiUrl = useSyncStore((s) => s.apiUrl);
   const isSyncing = useSyncStore((s) => s.isSyncing);
@@ -210,6 +217,71 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleEnable2FA = () => {
+    navigation.navigate("TwoFactorSetup");
+  };
+
+  const handleDisable2FA = () => {
+    if (!user) return;
+
+    Alert.alert(
+      "Onemogući 2FA",
+      "Da li ste sigurni da želite da onemogućite dvofaktorsku autentifikaciju?",
+      [
+        { text: "Otkaži", style: "cancel" },
+        {
+          text: "Onemogući",
+          style: "destructive",
+          onPress: () => {
+            disableTwoFactor(user.id);
+            Alert.alert("Uspeh", "Dvofaktorska autentifikacija je onemogućena.");
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewBackupCodes = () => {
+    if (!user) return;
+
+    const codes = getBackupCodes(user.id);
+    if (codes.length === 0) {
+      Alert.alert("Info", "Nemate preostalih backup kodova.");
+      return;
+    }
+
+    const codesList = codes.map((code, i) => `${i + 1}. ${code}`).join("\n");
+    Alert.alert(
+      "Backup kodovi",
+      `Preostali backup kodovi:\n\n${codesList}\n\nSvaki kod može se koristiti samo jednom.`,
+      [{ text: "OK" }]
+    );
+  };
+
+  const handleRegenerateBackupCodes = () => {
+    if (!user) return;
+
+    Alert.alert(
+      "Regeneriši backup kodove",
+      "Da li ste sigurni? Svi postojeći backup kodovi će biti zamenjeni novim.",
+      [
+        { text: "Otkaži", style: "cancel" },
+        {
+          text: "Regeneriši",
+          onPress: () => {
+            const newCodes = regenerateBackupCodes(user.id);
+            const codesList = newCodes.map((code, i) => `${i + 1}. ${code}`).join("\n");
+            Alert.alert(
+              "Novi backup kodovi",
+              `Sačuvajte ove kodove na sigurnom mestu:\n\n${codesList}`,
+              [{ text: "OK" }]
+            );
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
@@ -330,6 +402,80 @@ export default function ProfileScreen() {
 
         {/* Action Buttons */}
         <View className="px-6 pb-4 gap-3">
+          {/* 2FA Settings */}
+          <View className="bg-white rounded-2xl p-4 shadow-sm">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center gap-3">
+                <View className="w-10 h-10 bg-purple-50 rounded-full items-center justify-center">
+                  <Ionicons name="shield-checkmark" size={20} color="#9333EA" />
+                </View>
+                <View>
+                  <Text className="text-gray-900 text-base font-bold">
+                    Dvofaktorska autentifikacija
+                  </Text>
+                  <Text className="text-gray-500 text-xs">
+                    {isTwoFactorEnabled ? "Omogućena" : "Onemogućena"}
+                  </Text>
+                </View>
+              </View>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  isTwoFactorEnabled ? "bg-green-100" : "bg-gray-100"
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${
+                    isTwoFactorEnabled ? "text-green-700" : "text-gray-600"
+                  }`}
+                >
+                  {isTwoFactorEnabled ? "ON" : "OFF"}
+                </Text>
+              </View>
+            </View>
+
+            {isTwoFactorEnabled ? (
+              <View className="gap-2">
+                <Pressable
+                  onPress={handleViewBackupCodes}
+                  className="bg-purple-50 rounded-xl px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-70"
+                >
+                  <Ionicons name="eye-outline" size={18} color="#9333EA" />
+                  <Text className="text-purple-700 text-sm font-semibold">
+                    Prikaži backup kodove
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleRegenerateBackupCodes}
+                  className="bg-blue-50 rounded-xl px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-70"
+                >
+                  <Ionicons name="refresh-outline" size={18} color="#3B82F6" />
+                  <Text className="text-blue-700 text-sm font-semibold">
+                    Regeneriši backup kodove
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleDisable2FA}
+                  className="bg-red-50 rounded-xl px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-70"
+                >
+                  <Ionicons name="close-circle-outline" size={18} color="#EF4444" />
+                  <Text className="text-red-600 text-sm font-semibold">
+                    Onemogući 2FA
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <Pressable
+                onPress={handleEnable2FA}
+                className="bg-purple-500 rounded-xl px-4 py-3 flex-row items-center justify-center gap-2 active:opacity-70"
+              >
+                <Ionicons name="shield-checkmark-outline" size={18} color="#FFFFFF" />
+                <Text className="text-white text-sm font-semibold">
+                  Omogući 2FA
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
           {/* Sync Button - Available for ALL users */}
           <Pressable
             onPress={handleQuickSync}
