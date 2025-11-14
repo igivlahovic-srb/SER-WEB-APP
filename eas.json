@@ -24,6 +24,13 @@
         "gradleCommand": ":app:assembleRelease",
         "credentialsSource": "remote"
       }
+    },
+    "local": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
     }
   },
   "submit": {
