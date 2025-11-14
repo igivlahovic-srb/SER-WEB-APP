@@ -4,6 +4,41 @@ Profesionalna mobilna aplikacija za servisiranje i održavanje water aparata sa 
 
 **Poslednje ažurirano**: 2025-01-XX (Verzija 2.1.0)
 
+---
+
+## 🌐 Web Admin Portal
+
+**Web admin portal je sada dostupan!** Upravljajte korisnicima i servisima profesionalno preko web browser-a.
+
+### 🚀 Quick Deploy na Ubuntu Server
+
+```bash
+# 1. Kopiraj web-admin folder na server
+scp -r web-admin root@YOUR_SERVER_IP:/root/
+
+# 2. Pokreni automatski deployment
+ssh root@YOUR_SERVER_IP
+cd /root/web-admin
+sudo bash DEPLOY_TO_UBUNTU.sh
+```
+
+**Portal dostupan na:** `https://admin.lafantanasrb.local`
+
+**Login:** `admin` / `admin123`
+
+**Funkcionalnosti:**
+- ✅ Dashboard sa statistikama uživo
+- ✅ Upravljanje korisnicima
+- ✅ Istorija servisa
+- ✅ Radni dani (workday management)
+- ✅ Nginx reverse proxy sa SSL
+- ✅ PM2 auto-start pri boot-u
+- ✅ Mobile app sinhronizacija
+
+**📚 Dokumentacija:** `web-admin/QUICK_START.md` i `web-admin/UBUNTU_DEPLOYMENT_GUIDE.md`
+
+---
+
 ## 🎨 Ikone Aplikacije
 
 Aplikacija koristi La Fantana brending sa belim slovima na plavom gradijent pozadini.
