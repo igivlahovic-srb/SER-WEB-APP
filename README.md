@@ -2,7 +2,7 @@
 
 Profesionalna mobilna aplikacija za servisiranje i održavanje water aparata sa bocom od 19L.
 
-**Poslednje ažurirano**: 2025-01-XX (Verzija 2.1.0)
+**Poslednje ažurirano**: 2025-01-XX (Verzija 2.2.0)
 
 ---
 
@@ -79,7 +79,31 @@ Za generisanje novih ikona sa belim slovima:
    - **Veća i čitljivija tipografija**
 5. Detaljnije uputstvo: `ICON_GENERATOR_INSTRUCTIONS.md`
 
-## 🔧 Nedavne Izmene (v2.1.0)
+## 🔧 Nedavne Izmene (v2.2.0)
+
+### 🆕 Nove Funkcionalnosti
+- **⚡ LIVE SINHRONIZACIJA (Real-Time Sync)** 🔴
+  - **Automatska bidirekciona sinhronizacija svakih 5 sekundi!**
+  - Promene na web portalu se **INSTANTLY** prikazuju u mobilnoj aplikaciji
+  - Promene u mobilnoj aplikaciji se **INSTANTLY** šalju na web portal
+  - **Offline-First pristup**: Aplikacija radi nesmetano bez portala
+  - **Auto-reconnect**: Čim se portal ponovo aktivira, sinhronizacija se automatski nastavlja
+  - **Inteligentno spajanje**: Koristi se najnovija verzija podataka (po timestamp-u)
+  - **Zero konfiguracija**: Automatski počinje kada se poveže na portal
+  - **Pozadinski proces**: Ne ometa rad aplikacije
+  - Ne treba više manualno pritisnuti "Sinhronizuj" - SVE JE AUTOMATSKO! 🎉
+
+### 🛠️ Tehnički Detalji Live Sync-a
+- **Polling mehanizam**: Proverava portal svakih 5 sekundi
+- **Smart error handling**: Automatski ignoriše greške kada portal nije dostupan
+- **Bidirectional**: Push lokalne promene + Pull remote promene u svakom ciklusu
+- **Data merging**: Timestamp-based conflict resolution
+- **Memory efficient**: Koristi Zustand state management
+- **Battery friendly**: Automatski se zaustavlja kada app nije aktivan
+- **Network aware**: Radi preko WiFi i mobilnih podataka
+- **Implementacija**: `src/services/live-sync.ts` + automatski start u `App.tsx`
+
+## 🔧 Prethodne Izmene (v2.1.0)
 
 ### ✅ Ispravljene Greške
 - **Text Rendering Errors**: Ispravljeno svih 5 instanci "Text strings must be rendered within a <Text> component" greške

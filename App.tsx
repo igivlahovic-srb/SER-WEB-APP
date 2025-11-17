@@ -5,6 +5,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { useEffect } from "react";
 import { checkForUpdatesOnStart } from "./src/services/auto-update";
+import { liveSyncService } from "./src/services/live-sync";
+import { useSyncStore } from "./src/state/syncStore";
+import { useAuthStore } from "./src/state/authStore";
 
 /*
 IMPORTANT NOTICE: DO NOT REMOVE
@@ -27,11 +30,39 @@ const openai_api_key = Constants.expoConfig.extra.apikey;
 
 */
 
-// La Fantana WHS v2.1.0 - Bidirectional Sync + Login Screen Logo Fix + Auto-Update
+// La Fantana WHS v2.2.0 - Live Sync: Real-time bidirectional sync with web portal (5-second polling)
 export default function App() {
   useEffect(() => {
     // Check for updates on app start
     checkForUpdatesOnStart();
+
+    // Start live sync service when app starts
+    const syncStore = useSyncStore.getState();
+    const authStore = useAuthStore.getState();
+
+    // Only start live sync if:
+    // 1. Portal URL is configured
+    // 2. User is authenticated
+    // 3. Live update is enabled (will be true by default after Settings screen update)
+    const startLiveSync = () => {
+      if (syncStore.apiUrl && syncStore.apiUrl !== "http://localhost:3000" && authStore.isAuthenticated) {
+        console.log("[App] Starting live sync service...");
+        liveSyncService.start({
+          enabled: true,
+          pollIntervalMs: 5000, // 5 seconds as requested
+          autoReconnect: true, // Keep trying even if portal is offline
+        });
+      }
+    };
+
+    // Initial start
+    startLiveSync();
+
+    // Cleanup: stop live sync when app unmounts
+    return () => {
+      console.log("[App] Stopping live sync service...");
+      liveSyncService.stop();
+    };
   }, []);
 
   return (
