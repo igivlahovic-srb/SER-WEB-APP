@@ -13,6 +13,7 @@
     "backend/node_modules",
     "backend/generated",
     ".expo",
-    "web-admin"
+    "web-admin",
+    "mock-portal-server.ts"
   ]
 }
