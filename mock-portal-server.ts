@@ -39,6 +39,7 @@ function jsonResponse(data: any, status = 200) {
 // Request handler
 const server = serve({
   port: 3000,
+  hostname: "0.0.0.0", // Listen on all network interfaces
   fetch(req: Request) {
     const url = new URL(req.url);
     const path = url.pathname;
