@@ -141,7 +141,7 @@ export class LiveSyncService {
 
       // Check if portal is configured
       const portalUrl = syncStore.apiUrl;
-      if (!portalUrl || portalUrl === "http://localhost:3000") {
+      if (!portalUrl) {
         // Portal not configured, skip silently
         this.isSyncing = false;
         return;

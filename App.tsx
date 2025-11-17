@@ -41,17 +41,21 @@ export default function App() {
     const authStore = useAuthStore.getState();
 
     // Only start live sync if:
-    // 1. Portal URL is configured
+    // 1. Portal URL is configured (including localhost for testing)
     // 2. User is authenticated
-    // 3. Live update is enabled (will be true by default after Settings screen update)
     const startLiveSync = () => {
-      if (syncStore.apiUrl && syncStore.apiUrl !== "http://localhost:3000" && authStore.isAuthenticated) {
+      if (syncStore.apiUrl && authStore.isAuthenticated) {
         console.log("[App] Starting live sync service...");
+        console.log("[App] Portal URL:", syncStore.apiUrl);
         liveSyncService.start({
           enabled: true,
           pollIntervalMs: 5000, // 5 seconds as requested
           autoReconnect: true, // Keep trying even if portal is offline
         });
+      } else {
+        console.log("[App] Live sync not started:");
+        console.log("  - Portal URL configured:", !!syncStore.apiUrl, syncStore.apiUrl);
+        console.log("  - User authenticated:", authStore.isAuthenticated);
       }
     };
 
