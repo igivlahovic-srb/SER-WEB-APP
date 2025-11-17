@@ -1,4 +1,12 @@
 // API service for syncing with Web Admin Panel
+import {
+  apiRateLimiter,
+  syncRateLimiter,
+  InputSanitizer,
+  InputValidator,
+  SecureErrorHandler,
+  RequestLogger,
+} from "../utils/security";
 
 const DEFAULT_API_URL = 'http://localhost:3000';
 
@@ -16,7 +24,12 @@ class WebAdminAPI {
   }
 
   setApiUrl(url: string) {
-    this.apiUrl = url;
+    // Validate and sanitize URL before setting
+    const sanitizedUrl = InputSanitizer.sanitizeUrl(url);
+    if (!sanitizedUrl) {
+      throw new Error("Invalid API URL provided");
+    }
+    this.apiUrl = sanitizedUrl;
   }
 
   getApiUrl() {
@@ -25,14 +38,31 @@ class WebAdminAPI {
 
   // Sync users to web admin panel
   async syncUsers(users: any[]): Promise<SyncResponse> {
+    const startTime = Date.now();
+
     try {
+      // Rate limiting check
+      if (!syncRateLimiter.isAllowed("syncUsers")) {
+        const message = "Too many sync requests. Please wait before trying again.";
+        SecureErrorHandler.logError(new Error(message), "syncUsers");
+        return { success: false, message };
+      }
+
+      // Sanitize user data before sending
+      const sanitizedUsers = users.map((user) =>
+        InputSanitizer.sanitizeObject(user)
+      );
+
       const response = await fetch(`${this.apiUrl}/api/sync/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ users }),
+        body: JSON.stringify({ users: sanitizedUsers }),
       });
+
+      const duration = Date.now() - startTime;
+      RequestLogger.logRequest("/api/sync/users", "POST", response.status, duration);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -41,24 +71,44 @@ class WebAdminAPI {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Error syncing users:', error);
+      const duration = Date.now() - startTime;
+      RequestLogger.logRequest("/api/sync/users", "POST", 0, duration);
+
+      SecureErrorHandler.logError(error, "syncUsers");
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: SecureErrorHandler.getUserMessage(error),
       };
     }
   }
 
   // Sync service tickets to web admin panel
   async syncTickets(tickets: any[]): Promise<SyncResponse> {
+    const startTime = Date.now();
+
     try {
+      // Rate limiting check
+      if (!syncRateLimiter.isAllowed("syncTickets")) {
+        const message = "Too many sync requests. Please wait before trying again.";
+        SecureErrorHandler.logError(new Error(message), "syncTickets");
+        return { success: false, message };
+      }
+
+      // Sanitize ticket data before sending
+      const sanitizedTickets = tickets.map((ticket) =>
+        InputSanitizer.sanitizeObject(ticket)
+      );
+
       const response = await fetch(`${this.apiUrl}/api/sync/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tickets }),
+        body: JSON.stringify({ tickets: sanitizedTickets }),
       });
+
+      const duration = Date.now() - startTime;
+      RequestLogger.logRequest("/api/sync/tickets", "POST", response.status, duration);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -67,10 +117,13 @@ class WebAdminAPI {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Error syncing tickets:', error);
+      const duration = Date.now() - startTime;
+      RequestLogger.logRequest("/api/sync/tickets", "POST", 0, duration);
+
+      SecureErrorHandler.logError(error, "syncTickets");
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: SecureErrorHandler.getUserMessage(error),
       };
     }
   }
