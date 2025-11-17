@@ -1,65 +1,23 @@
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require("eslint/config");
-const expoConfig = require("eslint-config-expo/flat");
+// @ts-check
+const { FlatCompat } = require("@eslint/eslintrc");
+const js = require("@eslint/js");
 
-module.exports = defineConfig([
-  {
-    ignores: ["web-admin/**"],
-  },
-  expoConfig,
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+});
+
+module.exports = [
+  ...compat.extends("expo"),
   {
     ignores: [
-      "**/dist/*",
-      "**/dist/**",
-      "index.ts",
-      "rootStore.example.ts",
-      "nativewind-env.d.ts",
-      "patches/*",
-      "bun.lock",
-      "eslint.config.js",
-      "COMPLETE_WEB_SERVER.js",
-      "WEB_*.md",
-      "web-admin",
-      "web-admin/**",
-      "web-admin/**/*",
-      "**/web-admin",
-      "**/web-admin/**",
-      "**/web-admin/.next",
-      "**/web-admin/.next/**",
-      "**/.next",
-      "**/.next/**",
-      "**/node_modules",
       "**/node_modules/**",
-      "**/data",
-      "**/data/**",
-      "**/out",
-      "**/out/**",
-      "**/build",
+      "**/.expo/**",
       "**/build/**",
-      "convert-icon.js",
+      "**/dist/**",
+      "**/*.config.js",
+      "**/patches/**",
+      "**/types/**",
     ],
-    settings: {
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
-          project: "./tsconfig.json",
-        },
-      },
-    },
-    plugins: {
-      "react-hooks": require("eslint-plugin-react-hooks"),
-    },
-    rules: {
-      // Formatting nits the sorter doesn't fix
-      "comma-spacing": ["warn", { before: false, after: true }],
-      // React recommended rules (only those not already covered by expo config)
-      "react/jsx-no-undef": "error",
-      "react/jsx-uses-react": "off", // React 17+ JSX transform
-      "react/react-in-jsx-scope": "off",
-
-      // Enforce React Hooks rules
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
-    },
   },
-]);
+];

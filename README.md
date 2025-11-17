@@ -8,54 +8,16 @@ Profesionalna mobilna aplikacija za servisiranje i održavanje water aparata sa 
 
 ## 🌐 Web Admin Portal
 
-**Web admin portal je sada dostupan!** Upravljajte korisnicima i servisima profesionalno preko web browser-a.
+**Web admin portal je dostupan kao zaseban projekat:** https://github.com/igivlahovic-srb/web-admin-portal
 
-### 🚀 Quick Deploy na Ubuntu Server
+Mobilna aplikacija se sinhronizuje sa web portalom i podržava **live bidirectional sync** (svakih 5 sekundi).
 
-**Automatski deployment script je sada dostupan!** Jedan script instalira sve (Node.js, Bun, PM2, Nginx, web portal).
-
-#### **Metod 1: Automatski Script (Preporučeno)** ⚡
-
-```bash
-# 1. Prebacite script na server
-scp DEPLOY_WEB_PORTAL_UBUNTU.sh root@YOUR_SERVER_IP:/root/
-
-# 2. Konektujte se i pokrenite
-ssh root@YOUR_SERVER_IP
-chmod +x DEPLOY_WEB_PORTAL_UBUNTU.sh
-sudo bash DEPLOY_WEB_PORTAL_UBUNTU.sh
-```
-
-**Gotovo!** Script automatski povlači kod sa GitHub-a i konfiguriše sve.
-
-#### **Metod 2: Direktan Download**
-
-```bash
-ssh root@YOUR_SERVER_IP
-wget https://raw.githubusercontent.com/igivlahovic-srb/web-admin-portal/main/DEPLOY_WEB_PORTAL_UBUNTU.sh
-chmod +x DEPLOY_WEB_PORTAL_UBUNTU.sh
-sudo bash DEPLOY_WEB_PORTAL_UBUNTU.sh
-```
-
-**Portal dostupan na:** `http://YOUR_SERVER_IP`
-
-**Login:** `admin` / `admin123`
-
-**Funkcionalnosti:**
-- ✅ Dashboard sa statistikama uživo
-- ✅ Upravljanje korisnicima
-- ✅ Istorija servisa
-- ✅ Radni dani (workday management)
-- ✅ Nginx reverse proxy sa SSL
-- ✅ PM2 auto-start pri boot-u
-- ✅ Mobile app sinhronizacija
-- ✅ Automatski pull sa GitHub-a
-
-**📚 Dokumentacija:**
-- `DEPLOYMENT_UPUTSTVO.md` - Kompletan deployment guide
-- `DEPLOY_WEB_PORTAL_UBUNTU.sh` - Automatski script
-
-**GitHub Repo:** https://github.com/igivlahovic-srb/web-admin-portal
+**Kako podesiti sinhronizaciju:**
+1. Deploy web portal na server (videti GitHub repo za uputstva)
+2. U mobilnoj aplikaciji → Profil → Settings
+3. Unesite URL web portala (npr. `http://192.168.1.100:3000`)
+4. Testirajte konekciju
+5. Live sync se automatski aktivira! ⚡
 
 ---
 
